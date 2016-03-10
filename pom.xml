@@ -56,11 +56,5 @@
             </roles>
         </developer>
     </developers>
-    <scm>
-        <connection>scm:svn:http://dev.libris.kb.se/svn/export2/trunk</connection>
-        <developerConnection>scm:svn:http://dev.libris.kb.se/svn/export2/trunk</developerConnection>
-        <tag>HEAD</tag>
-        <url>http://dev.libris.kb.se/svn/export2</url>
-    </scm>
 </project>
 
