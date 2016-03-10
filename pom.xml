@@ -9,7 +9,7 @@
     <groupId>se.kb.libris</groupId>
     <artifactId>export</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.1</version>
+    <version>3.0.0-alpha</version>
     <name>LIBRIS Export v2</name>
     <dependencies>
         <dependency>
