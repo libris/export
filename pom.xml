@@ -1,23 +1,35 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <parent>
-        <artifactId>super-pom</artifactId>
-        <groupId>se.kb.libris</groupId>
-        <version>1.1</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>se.kb.libris</groupId>
     <artifactId>export</artifactId>
     <packaging>jar</packaging>
     <version>3.0.0-alpha</version>
     <name>LIBRIS Export v2</name>
+    <organization>
+        <name>LIBRIS</name>
+        <url>http://libris.kb.se/</url>
+    </organization>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <dependencies>
+      <dependency>
+      	    <groupId>com.github.libris</groupId>
+      	    <artifactId>jmarctools</artifactId>
+      	    <version>90edfc74bcc006c2d45674cd67fbdc2db0964a97</version>
+      	</dependency>
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc14</artifactId>
-            <version>10.2.0.3.0</version>
+            <groupId>com.github.libris</groupId>
+            <artifactId>isbntools</artifactId>
+            <version>e70a5fbedb88bb2349de3ed5ff98e4475e8f7e1a</version>
         </dependency>
         <dependency>
+             <groupId>com.ibm.icu</groupId>
+             <artifactId>icu4j</artifactId>
+             <version>4.8.1.1</version>
+         </dependency>
+        <!--dependency>
             <groupId>se.kb.libris</groupId>
             <artifactId>marc</artifactId>
             <version>1.2.7</version>
@@ -31,17 +43,38 @@
             <groupId>se.kb.libris.commons</groupId>
             <artifactId>charcomposer</artifactId>
             <version>1.0</version>
-        </dependency>
+        </dependency-->
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                    <includes>
-                        <include>**/*.txt</include>
-                    </includes>
-            </resource>
-        </resources>        
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.0.2</version>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.6</version>
+          <configuration>
+            <descriptors>
+              <descriptor>src/assembly/src.xml</descriptor>
+            </descriptors>
+          </configuration>
+        </plugin>
+      </plugins>
+      <resources>
+        <resource>
+          <directory>src/main/java</directory>
+          <includes>
+            <include>**/*.txt</include>
+          </includes>
+        </resource>
+      </resources>
     </build>
     <developers>
         <developer>
@@ -56,5 +89,10 @@
             </roles>
         </developer>
     </developers>
+    <repositories>
+    		<repository>
+    		    <id>jitpack.io</id>
+    		    <url>https://jitpack.io</url>
+    		</repository>
+  	</repositories>
 </project>
-
