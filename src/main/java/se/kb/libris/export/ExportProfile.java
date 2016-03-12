@@ -833,7 +833,17 @@ public class ExportProfile {
 
             if (getSet("locations").contains(sigel) || getSet("locations").contains("*")) {
                 if (getProperty("holdtype", "interleaved").equalsIgnoreCase("INTERLEAVED")) {
-                    bibRecord = mergeBibMfhd(bibRecord, sigel, mfhd);
+                    try {
+                        bibRecord = mergeBibMfhd(bibRecord, sigel, mfhd);
+                    } catch (Exception e) {
+                        System.err.println("--- Exception while merging bibliographic and holdings record ---");
+                        System.err.println("Exception: " + e.getMessage());
+                        e.printStackTrace();
+                        System.err.println(bibRecord);
+                        System.err.println();
+                        System.err.println(mfhd);
+                        System.err.println("-----------------------------------------------------------------");
+                    }
                 } else if (getProperty("holdtype", "interleaved").equalsIgnoreCase("AFTER")) {
                     // add 003 to hold record
                     mfhd.addField(mfhd.createControlfield("003", getProperty("f003", "SE-LIBR")), MarcFieldComparator.strictSorted);

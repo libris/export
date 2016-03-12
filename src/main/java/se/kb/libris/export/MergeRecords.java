@@ -72,9 +72,26 @@ public class MergeRecords {
             
             if (mr.getType() == MarcRecord.BIBLIOGRAPHIC) {
                 if (bibRecord != null) {
-                    for (MarcRecord r: profile.mergeRecord(bibRecord, mfhds, auths)) {
-                        System.err.println(format(bibRecord));
-                        writer.writeRecord(r);
+                    try {
+                        for (MarcRecord r: profile.mergeRecord(bibRecord, mfhds, auths)) {
+                            System.err.println(format(bibRecord));
+                            writer.writeRecord(r);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("--- Exception while merging records ---");
+                        System.err.println(e.getMessage());
+                        e.printStackTrace();
+
+                        try {
+                            for (MarcRecord r: auths) System.err.println(r);
+                            System.err.println(bibRecord);
+                            for (MarcRecord r: mfhds.values()) System.err.println(r);
+                        } catch (Exception e2) {
+                            System.err.println(e2.getMessage());
+                            e2.printStackTrace();
+                            System.err.println("Error while printing records due to error in merge ...");
+                        }
+                        System.err.println("---------------------------------------");
                     }
                 }
                 
