@@ -839,6 +839,7 @@ public class ExportProfile {
                         System.err.println("--- Exception while merging bibliographic and holdings record ---");
                         System.err.println("Exception: " + e.getMessage());
                         e.printStackTrace();
+                        System.err.println();
                         System.err.println(bibRecord);
                         System.err.println();
                         System.err.println(mfhd);
