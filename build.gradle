@@ -1,0 +1,50 @@
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+archivesBaseName = "export"
+
+group = 'se.kb.libris'
+version = '3.0.0-alpha'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+  def groovyVersion=GroovySystem.getVersion()
+  compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+
+  compile 'com.github.libris:jmarctools:90edfc74bcc006c2d45674cd67fbdc2db0964a97'
+  compile 'com.github.libris:isbntools:e70a5fbedb88bb2349de3ed5ff98e4475e8f7e1a'
+  compile group: 'com.ibm.icu', name: 'icu4j', version: '4.8.1.1'
+}
+
+allprojects {
+		repositories {
+      mavenCentral()
+      maven { url "http://repository.codehaus.org/" }
+			maven { url "https://jitpack.io" }
+		}
+	}
+
+sourceSets {
+    main {
+      java { srcDir 'src/main/java' }
+      groovy { srcDir 'src/main/groovy' }
+    }
+    test {
+        groovy { srcDir 'src/test/groovy/' }
+    }
+}
+
+task(console, dependsOn: 'classes', type: JavaExec) {
+  description "Launch a Groovy Console"
+  classpath = sourceSets.main.runtimeClasspath
+  main = 'groovy.ui.Console'
+}
+
+task get_records (dependsOn: 'classes', type: JavaExec) {
+  standardInput = System.in
+  main = 'GetRecords'
+  classpath = sourceSets.main.runtimeClasspath
+}
