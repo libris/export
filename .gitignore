@@ -1,3 +1,5 @@
 .gradle/
 target/
 build/
+etc/export.properties
+etc/config.properties
