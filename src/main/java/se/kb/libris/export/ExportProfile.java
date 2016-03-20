@@ -151,7 +151,7 @@ public class ExportProfile {
             Datafield df = (Datafield)iter.next();
             Subfield sf6 = null;
             Iterator siter = df.iterator();
-            Set codes = new HashSet();
+            Set<String> codes = new TreeSet<String>();
 
             boolean uFound = false;
             while (siter.hasNext()) {
@@ -226,20 +226,12 @@ public class ExportProfile {
 
     public static MarcRecord addAuthIds(se.kb.libris.util.marc.MarcRecord mr, String p1, se.kb.libris.util.marc.MarcRecord ar, String p2) {
         Pattern pattern1 = Pattern.compile(p1);
-        //        "100|110|111|130|240|440|600|610|" +
-        //        "611|630|648|650|651|654|655|700|" +
-        //        "710|711|730|800|810|811|830");
         Pattern pattern2 = Pattern.compile(p2);
-        //        "100|110|111|150");
 
         String authId = ((Controlfield)ar.iterator("001").next()).getData();
 
-        // step 1: iterate over 1XX-fields that might contain links
-        // to 1XX,6XX,7XX,8XX-fields
+        // iterate over fields in auth-pattern
         Iterator iter = ar.iterator(pattern2);
-
-        //System.err.println(ar);
-        //System.err.println(mr);
 
         while (iter.hasNext()) {
             // build string
@@ -260,7 +252,7 @@ public class ExportProfile {
 
             if (sb.length() == 0) continue;
 
-            // iterate over 1XX,6XX,7XX,8XX-fields
+            // iterate over fields in bib-pattern and add ids on match
             Iterator iter2 = mr.iterator(pattern1);
             while (iter2.hasNext()) {
                 StringBuffer sb2 = new StringBuffer();
@@ -279,18 +271,7 @@ public class ExportProfile {
                 normalize(sb);
                 normalize(sb2);
 
-                /*
-                System.err.println(authId + " " + df.getTag() + " '" + sb + "' --- " + df2.getTag() + " '" + sb2 + "' " + sb.equals(sb2));
-
-                if (sb.length() == sb2.length()) {
-                    for (int i=0;i<sb.length();i++) {
-                        System.err.println(authId + " '" + sb.charAt(i) + "' --- '" + sb2.charAt(i) + "' " + (sb.charAt(i) == sb2.charAt(i)));
-                    }
-                }
-                */
-
                 if (sb.toString().equals(sb2.toString())) {
-                    //System.err.println("match: " + df2.getTag()  + " -> " + df.getTag() + " '" + sb + "'");
                     df2.addSubfield('0', authId);
                 }
             }
@@ -342,7 +323,7 @@ public class ExportProfile {
         return mr;
     }
 
-    public static MarcRecord addSab(MarcRecord mr) {
+    public static MarcRecord addSabTitles(MarcRecord mr) {
         Iterator iter = mr.iterator("084");
 
         while (iter.hasNext()) {
@@ -627,21 +608,21 @@ public class ExportProfile {
             }
         }
     }
-    
+
     public void move240to244(MarcRecord mr) {
         for (Datafield df: mr.getDatafields("240")) {
             Map<String, Subfield> subfieldMap = new TreeMap<String, Subfield>();
 
             for (Subfield sf: df.getSubfields("a|k|l|n|p"))
                 subfieldMap.put(String.valueOf(sf.getCode()), sf);
-            
+
             if ((subfieldMap.containsKey("l") || !mr.getFields("041").isEmpty()) && mr.getDatafields("244").isEmpty()) {
                 Datafield df244 = mr.createDatafield("244");
                 df244.addSubfield('s', "Orig:s titel");
 
                 if (subfieldMap.containsKey("a") || subfieldMap.containsKey("k"))
                     df244.addSubfield(df244.createSubfield('a', ((subfieldMap.containsKey("a")? subfieldMap.get("a").getData():"") + " " + (subfieldMap.containsKey("k")? subfieldMap.get("k").getData():"")).trim()));
-                
+
                 if (subfieldMap.containsKey("n"))
                     df244.addSubfield('g', subfieldMap.get("n").getData());
 
@@ -649,12 +630,12 @@ public class ExportProfile {
                     df244.addSubfield('g', subfieldMap.get("p").getData());
 
                 mr.addField(df244, MarcFieldComparator.strictSorted);
-                
+
                 ListIterator li = mr.listIterator();
                 while (li.hasNext())
                     if (((Field)li.next()).getTag().equals("240"))
                         li.remove();
-                
+
                 return;
             }
         }
@@ -666,22 +647,22 @@ public class ExportProfile {
 
             for (Subfield sf: df.getSubfields("a|k|l|n|p"))
                 subfieldMap.put(String.valueOf(sf.getCode()), sf);
-            
+
             if ((subfieldMap.containsKey("l") || !mr.getFields("041").isEmpty())) {
                 Datafield df500 = mr.createDatafield("500");
-                df500.addSubfield('a', "Orig:s titel:" + 
-                        (subfieldMap.containsKey("a")? " " + subfieldMap.get("a").getData():"") + 
-                        (subfieldMap.containsKey("k")? " " + subfieldMap.get("k").getData():"") + 
-                        (subfieldMap.containsKey("n")? " " + subfieldMap.get("n").getData():"") + 
-                        (subfieldMap.containsKey("p")? " " + subfieldMap.get("p").getData():"")); 
+                df500.addSubfield('a', "Orig:s titel:" +
+                        (subfieldMap.containsKey("a")? " " + subfieldMap.get("a").getData():"") +
+                        (subfieldMap.containsKey("k")? " " + subfieldMap.get("k").getData():"") +
+                        (subfieldMap.containsKey("n")? " " + subfieldMap.get("n").getData():"") +
+                        (subfieldMap.containsKey("p")? " " + subfieldMap.get("p").getData():""));
 
                 mr.addField(df500, MarcFieldComparator.strictSorted);
-                
+
                 ListIterator li = mr.listIterator();
                 while (li.hasNext())
                     if (((Field)li.next()).getTag().equals("240"))
                         li.remove();
-                
+
                 return;
             }
         }
@@ -787,20 +768,14 @@ public class ExportProfile {
             bibRecord = move03592035a(bibRecord);
         }
 
-        if (getProperty("isbnhyphenate", "off").equalsIgnoreCase("ON")) {
+        if (getProperty("isbn", "dehyphenate").equalsIgnoreCase("dehyphenate")) {
+            bibRecord = dehyphenateIsbn(bibRecord);
+        } else if (getProperty("isbn", "dehyphenate").equalsIgnoreCase("hyphenate")) {
             bibRecord = hyphenateIsbn(bibRecord);
         }
 
-        if (getProperty("issndehyphenate", "off").equalsIgnoreCase("ON")) {
-            bibRecord = dehyphenateIssn(bibRecord);
-        }
-
-        if (getProperty("isbndehyphenate", "off").equalsIgnoreCase("ON")) {
-            bibRecord = dehyphenateIsbn(bibRecord);
-        }
-
-        if (getProperty("sab", "off").equalsIgnoreCase("ON")) {
-            bibRecord = addSab(bibRecord);
+        if (getProperty("sabtitles", "off").equalsIgnoreCase("ON")) {
+            bibRecord = addSabTitles(bibRecord);
         }
 
         if (getProperty("addauthlinks", "off").equalsIgnoreCase("ON")) {
@@ -814,15 +789,15 @@ public class ExportProfile {
         if (getProperty("generatesab", "off").equalsIgnoreCase("ON")) {
             DeweyMapper.addSAB(bibRecord);
         }
-        
+
         if (getProperty("move240to244", "off").equalsIgnoreCase("ON")) {
             move240to244(bibRecord);
         }
-        
+
         if (getProperty("move240to500", "off").equalsIgnoreCase("ON")) {
             move240to500(bibRecord);
         }
-        
+
         // Inactivate due to problems with machine-generated SAB from DEWEY
         /*if (getProperty("addxinfo", "false").equalsIgnoreCase("ON")) {
             bibRecord = addXinfo999(bibRecord);

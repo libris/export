@@ -9,16 +9,18 @@ public class SabMadness {
     static String lookupSab(String sab) {
         if (map == null) {
             map = new TreeMap<String, String>();
-            
+
             BufferedReader reader = null;
-            
+
             try {
                 reader = new BufferedReader(new InputStreamReader(SabMadness.class.getResourceAsStream("/se/kb/libris/export/sabrub.txt"), "ISO-8859-1"));
             } catch (Exception e) {
+              System.err.println(e.getMessage());
+              e.printStackTrace();
             }
-            
+
             String line = null;
-            
+
             try {
                 while ((line = reader.readLine()) != null) {
                     int idx = line.indexOf('\t');
@@ -39,14 +41,14 @@ public class SabMadness {
                 e.printStackTrace();
             }
         }
-        
+
         return map.get(sab);
     }
-    
+
     public static void main(String args[]) throws Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String line = null;
-            
+
         while ((line = reader.readLine()) != null) {
             System.out.println(lookupSab(line));
         }
