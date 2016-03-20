@@ -4,6 +4,7 @@ System.err.println "DEBUG: " + System.getProperty("user.dir")
 import se.kb.libris.util.marc.*
 import se.kb.libris.util.marc.io.*
 import se.kb.libris.export.ExportProfile
+import se.kb.libris.export.MergeRecords
 import groovy.xml.XmlUtil
 
 profile = new ExportProfile(new File("etc/export.properties"))
@@ -46,10 +47,21 @@ def getMerged(bib_id) {
   // Step 1 - get bib record
   def record = getRecord("bib", bib_id)
   def auth_ids = record.header.setSpec.findAll({ x -> x.toString().startsWith("authority") }).collect { x -> x.toString() }
+
+  if (record.metadata.record.size() == 0) {
+      System.err.println("WARNING - NO SUCH BIB_ID: " + bib_id);
+      return []
+  }
+
   def bib = MarcXmlRecordReader.fromXml(toXml(record.metadata.record))
 
   // filter out license or e-record?
-  if (profile.filter(bib)) return []
+  if (profile.filter(bib)) {
+    System.err.println("FILTERED: " + MergeRecords.format(bib));
+    return []
+  } else {
+    System.err.println(MergeRecords.format(bib));
+  }
 
   // Step 2 - find and get authority records
   def auths = new HashSet<MarcRecord>()
@@ -67,8 +79,6 @@ def getMerged(bib_id) {
       holdings.put(mr.iterator("852").next().iterator("b").next().getData(), mr)
     }
   }
-
-  // Step 4 - merge records
 
   return profile.mergeRecord(bib, holdings, auths)
   //return [ auths, MarcXmlRecordReader.fromXml(bib), holdings ]
