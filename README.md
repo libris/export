@@ -1,6 +1,7 @@
 # Export
 
-    DISCLAIMER: denna programvara, och framförallt dokumentationen av den, är under uppbyggnad och ännu inte användbar fullt ut.
+    DISCLAIMER: denna programvara, och framförallt dokumentationen av den, är under uppbyggnad
+    och ännu inte användbar fullt ut.
 
 Librisexport via OAI-PMH
 
