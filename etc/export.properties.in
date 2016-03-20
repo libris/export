@@ -1,44 +1,36 @@
-#Mon Sep 28 17:31:44 CEST 2009
-ftpuser=
-month=*
-f003=SE-LIBR
-year=*
-authoperators=
-holdupdate=on
-lcsh=on
-licensefilter=on
-composestrategy=composelatin1
+# Example file for Libris export using OAI-PMH
+
+name=Exempel
+longname=Exempelbiblioteket
+
+# selection
 authtype=interleaved
-isbnhyphenate=off
-name=TESTIGEN
-contact=kalle.svensson@testbiblioteket.se
-ftpdirectory=
-post=
-delivery_type=LIBRISFTP
-day_in_month=*
+holdtype=interleaved
 locations=Te
-bibcreate=on
-ftpserver=
-period=1
-authcreate=off
-format=MARCXML
-holdoperators=
-status=on
-longname=Testbiblioteket
-extrafields=B\:650; Ai\:650
-biblevel=on
+
+# settings for bibliographic records
+f003=SE-LIBR
+lcsh=on
+isbnhyphenate=off
 issnhyphenate=off
 issndehyphenate=off
-errcontact=
-holdtype=interleaved
-holdcreate=on
-characterencoding=UTF-8
 isbndehyphenate=on
-bibupdate=on
-day_in_week=*
-efilter=off
 biboperators=Te
 move0359=on
-authupdate=off
-ftppassword=
 sab=on
+extrafields="S:650; Ai:650"
+nameform=Forskningsbiblioteksform
+
+# authority record handling
+
+# holding record handling
+
+# filtering
+licensefilter=on
+biblevel=on
+efilter=off
+
+# output
+composestrategy=composelatin1
+format=MARCXML
+characterencoding=UTF-8
