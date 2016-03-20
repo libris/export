@@ -1,36 +1,34 @@
-# Example file for Libris export using OAI-PMH
+# Exempelfil för Libris export via OAI-PMH
 
 name=Exempel
 longname=Exempelbiblioteket
 
-# selection
+# postutseende
 authtype=interleaved
 holdtype=interleaved
-locations=Te
+locations=*
 
-# settings for bibliographic records
+# datamassage
 f003=SE-LIBR
 lcsh=on
-isbnhyphenate=off
-issnhyphenate=off
-issndehyphenate=off
-isbndehyphenate=on
-biboperators=Te
+isbn=dehyphenate
 move0359=on
-sab=on
-extrafields="S:650; Ai:650"
-nameform=Forskningsbiblioteksform
+sabtitles=on
+extrafields=A\:650; B\:650; C\:650
+nameform=
+move240to244=off
+move240to500=off
+addauthlinks=off
+generatedewey=on
+generatesab=on
+addauthids=on
 
-# authority record handling
-
-# holding record handling
-
-# filtering
+# filtrering
 licensefilter=on
 biblevel=on
 efilter=off
 
 # output
 composestrategy=composelatin1
-format=MARCXML
+format=ISO2709
 characterencoding=UTF-8
