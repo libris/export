@@ -27,12 +27,12 @@ Librisexport via OAI-PMH
     # sudo apt-get install gradle
 
 ## Windows
-Coming soon
+Coming soon ...
 
 ## Användning - exempel
 
-1. Kopiera etc/config.properties.in till etc/config.properties och fyll i rätt värden
-2. Kopiera etc/export.properties.in till etc/export.properties och anpassa efter behov
-3. Använd gradle för att hämta poster
+* Kopiera etc/config.properties.in till etc/config.properties och fyll i rätt värden
+* Kopiera etc/export.properties.in till etc/export.properties och anpassa efter behov
+* Använd gradle för att hämta poster
 
-    # gradle -q get_records
+    gradle -q get_records
