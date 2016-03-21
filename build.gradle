@@ -7,8 +7,8 @@ archivesBaseName = "export"
 group = 'se.kb.libris'
 version = '3.0.0-alpha'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 
 dependencies {
   def groovyVersion=GroovySystem.getVersion()
@@ -53,5 +53,11 @@ task(console, dependsOn: 'classes', type: JavaExec) {
 task get_records (dependsOn: 'classes', type: JavaExec) {
   standardInput = System.in
   main = 'GetRecords'
+  classpath = sourceSets.main.runtimeClasspath
+}
+
+task list_changes (dependsOn: 'classes', type: JavaExec) {
+  standardInput = System.in
+  main = 'ListChanges'
   classpath = sourceSets.main.runtimeClasspath
 }
