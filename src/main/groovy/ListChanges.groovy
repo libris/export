@@ -1,5 +1,3 @@
-System.err.println "DEBUG: " + new Date()
-
 import se.kb.libris.util.marc.*
 import se.kb.libris.util.marc.io.*
 import se.kb.libris.export.ExportProfile
@@ -162,11 +160,14 @@ def listHoldIdentifiers(from, until) {
   return ret
 }
 
+def from = args[0], until = args.size()==2? args[1]:"2050-01-01T00:00:00Z"
 def ids = new TreeSet<Integer>()
 
-ids.addAll(listBibIdentifiers("2016-03-01T00:00:00Z", "2016-03-01T23:59:59Z"))
-ids.addAll(listAuthIdentifiers("2016-03-01T00:00:00Z", "2016-03-01T23:59:59Z"))
-ids.addAll(listHoldIdentifiers("2016-03-01T00:00:00Z", "2016-03-01T23:59:59Z"))
+System.err.println "DEBUG: from:${from} until:${until}"
+
+ids.addAll(listBibIdentifiers(from, until))
+ids.addAll(listAuthIdentifiers(from, until))
+ids.addAll(listHoldIdentifiers(from, until))
 
 for (Integer id: ids)
   println id

@@ -57,6 +57,10 @@ task get_records (dependsOn: 'classes', type: JavaExec) {
 }
 
 task list_changes (dependsOn: 'classes', type: JavaExec) {
+  if (project.hasProperty('range')) {
+    args(range.split(','))
+  }
+
   standardInput = System.in
   main = 'ListChanges'
   classpath = sourceSets.main.runtimeClasspath
