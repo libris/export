@@ -27,7 +27,9 @@ Librisexport via OAI-PMH
     # sudo apt-get install gradle
 
 ### Windows
-Coming soon ...
+
+* http://groovy-lang.org/download.html
+* https://docs.gradle.org/current/userguide/installation.html
 
 ### Konfiguration
 
