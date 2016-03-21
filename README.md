@@ -41,6 +41,11 @@ Ange bib_id manuellt och få posterna utskrivna i terminalen (högst oanvändbar
 
     # gradle -q get_records
     
+Skapa en fil med bib_id:n för (1) ändrade bibposter, (2) bibposter med ändrade auktoritetsposter och (3) bibposter med ändrade holdingsposter.
+
+    # gradle -q list_changes -Prange=2016-03-01T00:00:00Z,2016-03-01T23:59:59Z > fil.txt
+
 Skicka en en fil med bib_id (`fil.txt`) till exportprogrammet och spara posterna i `utfil.txt`
 
     # cat fil.txt | gradle -q get_records > utfil.txt
+    
