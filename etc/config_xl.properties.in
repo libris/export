@@ -1,0 +1,4 @@
+OaiPmhBaseUrl="http://localhost:8080/oaipmh/"
+URIBase="https://libris-qa.kb.se/"
+User=""
+Password=""
