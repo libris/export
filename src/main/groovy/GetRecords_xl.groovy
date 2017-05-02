@@ -29,7 +29,7 @@ def get(url) {
 
 def getRecord(id) {
   id = java.net.URLEncoder.encode(id, "UTF-8")
-  def url = "${config.OaiPmhBaseUrl}?verb=GetRecord&metadataPrefix=marcxml_includehold&identifier=${id}"
+  def url = "${config.OaiPmhBaseUrl}?verb=GetRecord&metadataPrefix=marcxml_includehold_expanded&identifier=${id}"
   return xml = new XmlSlurper(false, false).parseText(get(url)).GetRecord.record
 }
 
