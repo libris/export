@@ -5,3 +5,5 @@ etc/export.properties
 etc/config.properties
 tmp/
 etc/config_xl.properties
+.idea
+/.nb-gradle/

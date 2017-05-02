@@ -160,14 +160,20 @@ def listHoldIdentifiers(from, until) {
   return ret
 }
 
+def getChangedRecords(from, until) {
+    def ids = new TreeSet<Integer>()
+
+    ids.addAll(listBibIdentifiers(from, until))
+    ids.addAll(listAuthIdentifiers(from, until))
+    ids.addAll(listHoldIdentifiers(from, until))
+
+    return ids
+}
+
 def from = args[0], until = args.size()==2? args[1]:"2050-01-01T00:00:00Z"
-def ids = new TreeSet<Integer>()
 
 System.err.println "DEBUG: from:${from} until:${until}"
 
-ids.addAll(listBibIdentifiers(from, until))
-ids.addAll(listAuthIdentifiers(from, until))
-ids.addAll(listHoldIdentifiers(from, until))
-
-for (Integer id: ids)
+for (Integer id: getChangedRecords(from, until))
   println id
+

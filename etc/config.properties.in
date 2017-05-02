@@ -1,3 +1,6 @@
 OaiPmhBaseUrl="http://data.libris.kb.se"
+AuthBaseUrl="http://data.libris.kb.se/auth/oaipmh"
+BibBaseUrl="http://data.libris.kb.se/bib/oaipmh"
+HoldBsaeUrl="http://data.libris.kb.se/hold/oaipmh"
 User=""
 Password=""

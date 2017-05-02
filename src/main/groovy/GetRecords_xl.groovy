@@ -22,10 +22,13 @@ def get(url) {
     conn.setRequestProperty( "Authorization", "Basic ${authString}" )
   }
 
+  //System.err.println("URL: " + url)
+
   return conn.content.text
 }
 
 def getRecord(id) {
+  id = java.net.URLEncoder.encode(id, "UTF-8")
   def url = "${config.OaiPmhBaseUrl}?verb=GetRecord&metadataPrefix=marcxml_includehold&identifier=${id}"
   return xml = new XmlSlurper(false, false).parseText(get(url)).GetRecord.record
 }
@@ -39,7 +42,6 @@ def getMerged(bib_id) {
       return []
   }
 
-  def auth_ids = record.about.authority.collect { x -> "${config.URIBase}" + x.@id.toString() }
   def bib = MarcXmlRecordReader.fromXml(toXml(record.metadata.record))
 
   // filter out license or e-record?
@@ -51,10 +53,20 @@ def getMerged(bib_id) {
   }
 
   // Step 2 - find and get authority records
+  // @TODO replace with oneliner ...
+  def auth_ids = []
+  record.metadata.record.datafield.subfield.each {
+    if (it.@code.text().equals("0") && (it.text().startsWith("https://id.kb.se/") || it.text().startsWith("https://libris.kb.se/"))) {
+      auth_ids.add(it.text())
+    }
+  }
+
   def auths = new HashSet<MarcRecord>()
   if (!profile.getProperty("authtype", "NONE").equalsIgnoreCase("NONE")) {
     auth_ids.each { auth_id ->
-      auths.add(MarcXmlRecordReader.fromXml(toXml(getRecord(auth_id).metadata.record)))
+      getRecord(auth_id).metadata.record.each {
+        auths.add(MarcXmlRecordReader.fromXml(toXml(it)))
+      }
     }
   }
 

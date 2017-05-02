@@ -7,8 +7,8 @@ archivesBaseName = "export"
 group = 'se.kb.libris'
 version = '3.0.0-alpha'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
   def groovyVersion=GroovySystem.getVersion()
@@ -17,6 +17,8 @@ dependencies {
   compile 'com.github.libris:jmarctools:90edfc74bcc006c2d45674cd67fbdc2db0964a97'
   compile 'com.github.libris:isbntools:e70a5fbedb88bb2349de3ed5ff98e4475e8f7e1a'
   compile group: 'com.ibm.icu', name: 'icu4j', version: '4.8.1.1'
+  compile group: 'org.dspace', name: 'xoai', version: '3.2.10'
+  compile fileTree(dir: 'libs', include: '*.jar')
 }
 
 allprojects {
@@ -25,20 +27,20 @@ allprojects {
       options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
   }
-
-	repositories {
-    mavenCentral()
-    maven { url "http://repository.codehaus.org/" }
-		maven { url "https://jitpack.io" }
-	}
 }
 
+repositories {
+    mavenCentral()
+    maven { url "http://repository.codehaus.org/" }
+    maven { url "https://jitpack.io" }    
+}
 
 sourceSets {
     main {
       java { srcDir 'src/main/java' }
       groovy { srcDir 'src/main/groovy' }
     }
+    
     test {
         groovy { srcDir 'src/test/groovy/' }
     }
@@ -71,3 +73,18 @@ task list_changes (dependsOn: 'classes', type: JavaExec) {
   main = 'ListChanges'
   classpath = sourceSets.main.runtimeClasspath
 }
+
+task listen (dependsOn: 'classes', type: JavaExec) {
+    Set a = []
+    
+    if (project.hasProperty("options")) a.addAll(project.getProperty("options").split());
+    if (project.hasProperty("profile")) a.add(project.getProperty("profile"));
+    if (project.hasProperty("config")) a.add(project.getProperty("config"));
+
+    args(a)
+    
+    standardInput = System.in
+    main = 'se.kb.libris.export.listener.OaiPmhListener'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
