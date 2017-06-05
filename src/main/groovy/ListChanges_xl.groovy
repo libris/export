@@ -16,38 +16,20 @@ def get(url) {
 
 
 def listBibIdentifiers(from, until) {
-    def ret = new TreeSet<Integer>()
+    def ret = new TreeSet<String>()
 
     for (String location: profile.getSet("locations")) {
         def data = null
 
         if (location.equals("*")) {
-            data = new XmlSlurper(false, false).parseText(get("${config.OaiPmhBaseUrl}oaipmh?verb=ListIdentifiers&metadataPrefix=marcxml_expanded&from=${from}&until=${until}"))
+            data = new XmlSlurper(false, false).parseText(get("${config.OaiPmhBaseUrl}oaipmh?verb=ListIdentifiers&metadataPrefix=marcxml_expanded&from=${from}&until=${until}&set=bib"))
         } else {
             data = new XmlSlurper(false, false).parseText(get("${config.OaiPmhBaseUrl}oaipmh?verb=ListIdentifiers&metadataPrefix=marcxml_expanded&from=${from}&until=${until}&set=bib:${location}"))
         }
 
-        def token = null
-        while (token != "") {
-            data.ListIdentifiers.header.each { header ->
-                def id = header.identifier.toString().split('/')[-1]
-                def out = false;
-
-                header.setSpec.each { setSpec ->
-                    def set = setSpec.toString()
-                    if (!out && (set.startsWith("location:") && set.substring(9) in profile.getSet("locations") || "*" in profile.getSet("locations"))) {
-                        if (header.@status.toString().equals("deleted")) {
-                            //System.err.println("# DELETED: " + id)
-                        } else {
-                            out = true
-                            ret.add(config.URIBase + id)
-                        }
-                    }
-                }
-            }
-
-            token = data.ListIdentifiers.resumptionToken.size() == 0? "":data.ListIdentifiers.resumptionToken.toString()
-            data = new XmlSlurper(false, false).parseText(get("${config.OaiPmhBaseUrl}bib/oaipmh?verb=ListIdentifiers&resumptionToken=${token}"))
+        data.ListIdentifiers.header.identifier.each { identifier ->
+            System.err.println("Adding: " + identifier + " , " + ++count)
+            ret.add(identifier.toString())
         }
     }
 
@@ -56,12 +38,34 @@ def listBibIdentifiers(from, until) {
     return ret
 }
 
+def listHoldIdentifiers(from, until) {
+    def ret = new TreeSet<String>()
+
+    for (String location: profile.getSet("locations")) {
+        def data = null
+
+        if (location.equals("*")) {
+            data = new XmlSlurper(false, false).parseText(get("${config.OaiPmhBaseUrl}oaipmh?verb=ListIdentifiers&metadataPrefix=marcxml&from=${from}&until=${until}&set=hold"))
+        } else {
+            data = new XmlSlurper(false, false).parseText(get("${config.OaiPmhBaseUrl}oaipmh?verb=ListIdentifiers&metadataPrefix=marcxml&from=${from}&until=${until}&set=hold:${location}"))
+        }
+
+        data.ListIdentifiers.about.each { about ->
+            ret.add( about.itemOf.@id.toString() )
+        }
+    }
+
+    System.err.println "DEBUG: found ${ret.size()} bib records with changes in related holding records"
+
+    return ret
+}
+
 def getChangedRecords(from, until) {
-    def ids = new TreeSet<Integer>()
+    def ids = new TreeSet<String>()
 
     ids.addAll(listBibIdentifiers(from, until))
     //ids.addAll(listAuthIdentifiers(from, until)) // Included implicitly with the usage of *_expanded metadataPrefix
-    //ids.addAll(listHoldIdentifiers(from, until)) // Included implicitly with the usage of bib:[location] sets (defined as bibs with holdings owned by [location])
+    ids.addAll(listHoldIdentifiers(from, until))
 
     return ids
 }
