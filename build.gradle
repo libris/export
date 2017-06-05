@@ -74,6 +74,17 @@ task list_changes (dependsOn: 'classes', type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
 }
 
+task list_changes_xl (dependsOn: 'classes', type: JavaExec) {
+    if (project.hasProperty('range')) {
+        args(range.split(','))
+    }
+
+    standardInput = System.in
+    main = 'ListChanges_xl'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+
 task listen (dependsOn: 'classes', type: JavaExec) {
     Set a = []
     
