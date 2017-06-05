@@ -28,7 +28,6 @@ def listBibIdentifiers(from, until) {
         }
 
         data.ListIdentifiers.header.identifier.each { identifier ->
-            System.err.println("Adding: " + identifier + " , " + ++count)
             ret.add(identifier.toString())
         }
     }
