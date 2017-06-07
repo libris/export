@@ -27,8 +27,9 @@ def listBibIdentifiers(from, until) {
             data = new XmlSlurper(false, false).parseText(get("${config.OaiPmhBaseUrl}oaipmh?verb=ListIdentifiers&metadataPrefix=marcxml_expanded&from=${from}&until=${until}&set=bib:${location}"))
         }
 
-        data.ListIdentifiers.header.identifier.each { identifier ->
-            ret.add(identifier.toString())
+        data.ListIdentifiers.header.each { header ->
+            if (! header.@status.toString().equals("deleted"))
+                ret.add(header.identifier.toString())
         }
     }
 
