@@ -49,3 +49,5 @@ Skicka en en fil med bib_id (`fil.txt`) till exportprogrammet och spara posterna
 
     # cat fil.txt | gradle -q get_records > utfil.txt
     
+## Genomföra en testexport
+[Guide för att genomföra en testexport](https://github.com/libris/export/blob/master/docs/manuell_export.md) givet en given exportprofil för att testa den senaste versionen av Libris XL
