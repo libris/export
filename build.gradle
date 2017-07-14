@@ -1,6 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'application'
 
 archivesBaseName = "export"
 
@@ -99,3 +100,17 @@ task listen (dependsOn: 'classes', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
 }
 
+// Fat JAR packaging
+jar {
+    manifest {
+        attributes "Main-Class": "Main"
+    }
+
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : project.zipTree(it).matching {
+                exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA','build','.gradle/**','build.gradle','gradle','gradlew','gradlew.bat','test'
+            }
+        }
+    }
+}
