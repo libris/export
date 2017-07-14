@@ -20,12 +20,16 @@ public class Main {
                 GetRecords.main(filteredArgs)
                 break
             case "ListChanges":
+                if (filteredArgs[0].startsWith("-Prange="))
+                    filteredArgs = filteredArgs[0].substring("-Prange=".length()).split(",")
                 ListChanges.main(filteredArgs)
                 break
             case "GetRecords_xl":
                 GetRecords_xl.main(filteredArgs)
                 break
             case "ListChanges_xl":
+                if (filteredArgs[0].startsWith("-Prange="))
+                    filteredArgs = filteredArgs[0].substring("-Prange=".length()).split(",")
                 ListChanges_xl.main(filteredArgs)
                 break
         }
