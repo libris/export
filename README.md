@@ -9,7 +9,7 @@ Librisexport via OAI-PMH
 
 ### Komponenter
 
-* Java 6+
+* Java 6+ JDK (Java Development Kit) Java JRE är ej tillräckligt.
 
 ### Konfiguration
 
