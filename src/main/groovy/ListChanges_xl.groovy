@@ -3,6 +3,12 @@ import se.kb.libris.export.ExportProfile
 profile = new ExportProfile(new File("etc/export.properties"))
 config = new ConfigSlurper().parse(new File("etc/config_xl.properties").toURL())
 
+// Tolerate both trailing slash and lack thereof
+if (!config.OaiPmhBaseUrl.endsWith("/"))
+    config.OaiPmhBaseUrl = config.OaiPmhBaseUrl + "/"
+if (!config.URIBase.endsWith("/"))
+    config.URIBase = config.URIBase + "/"
+
 def get(url) {
     def conn = url.toURL().openConnection()
 
@@ -13,7 +19,6 @@ def get(url) {
 
     return conn.content.text
 }
-
 
 def listBibIdentifiers(from, until) {
     def ret = new TreeSet<String>()
@@ -70,7 +75,7 @@ def getChangedRecords(from, until) {
     return ids
 }
 
-def from = args[0], until = args.size()==2? args[1]:"2050-01-01T00:00:00Z"
+def from = args[0], until = args.size()==2? args[1]:"2150-01-01T00:00:00Z"
 
 System.err.println "DEBUG: from:${from} until:${until}"
 

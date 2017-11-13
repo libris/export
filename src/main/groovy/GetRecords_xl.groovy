@@ -10,6 +10,12 @@ import groovy.xml.XmlUtil
 profile = new ExportProfile(new File("etc/export.properties"))
 config = new ConfigSlurper().parse(new File("etc/config_xl.properties").toURL())
 
+// Tolerate both trailing slash and lack thereof
+if (!config.OaiPmhBaseUrl.endsWith("/"))
+  config.OaiPmhBaseUrl = config.OaiPmhBaseUrl + "/"
+if (!config.URIBase.endsWith("/"))
+  config.URIBase = config.URIBase + "/"
+
 def toXml(node) {
   return XmlUtil.serialize(node)
 }
@@ -21,8 +27,6 @@ def get(url) {
     def authString  = "${config.User}:${config.Password}".getBytes().encodeBase64().toString()
     conn.setRequestProperty( "Authorization", "Basic ${authString}" )
   }
-
-  //System.err.println("URL: " + url)
 
   return conn.content.text
 }
@@ -53,7 +57,6 @@ def getMerged(bib_id) {
   }
 
   // Step 2 - find and get authority records
-  // @TODO replace with oneliner ...
   def auth_ids = []
   record.metadata.record.datafield.subfield.each {
     if (it.@code.text().equals("0") && (it.text().startsWith("https://id.kb.se/") || it.text().startsWith("https://libris.kb.se/"))) {
@@ -79,7 +82,6 @@ def getMerged(bib_id) {
   }
 
   return profile.mergeRecord(bib, holdings, auths)
-  //return [ auths, MarcXmlRecordReader.fromXml(bib), holdings ]
 }
 
 def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML"))? new MarcXmlRecordWriter(System.out, profile.getProperty("characterencoding")):new Iso2709MarcRecordWriter(System.out, profile.getProperty("characterencoding"))
