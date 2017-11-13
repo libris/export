@@ -1,4 +1,4 @@
-OaiPmhBaseUrl="http://localhost:8080/oaipmh/"
-URIBase="https://libris-qa.kb.se/"
+OaiPmhBaseUrl="https://libris.kb.se/data/oaipmh/"
+URIBase="https://libris.kb.se/"
 User=""
 Password=""
