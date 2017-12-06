@@ -27,8 +27,8 @@ def get(url) {
     def authString  = "${config.User}:${config.Password}".getBytes().encodeBase64().toString()
     conn.setRequestProperty( "Authorization", "Basic ${authString}" )
   }
-
-  return conn.content.text
+  byte[] body = conn.getInputStream().getBytes();
+  return new String(body, "UTF-8")
 }
 
 def getRecord(id) {
