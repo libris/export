@@ -31,6 +31,13 @@ echo %stopTime%>lastRun.timestamp
 rem DINA ÄNDRINGAR HÄR, gör något produktivt med datat i 'export.txt', t ex:
 rem Type export.txt
 
+
+
+
+rem Slut på egna ändringar.
+
+EXIT /B %ERRORLEVEL%
+
 :LOADUTCNOW
 for /f %%x in ('wmic path win32_utctime get /format:list ^| findstr "="') do set %%x
 IF [%Month:~1,1%] == [] (
