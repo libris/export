@@ -14,13 +14,14 @@ IF NOT EXIST %jarpath% (
 
 rem Om vi kör för första gången, använd 'nu' som start-tid.
 IF NOT EXIST lastRun.timestamp (
-	set currentTime=%DATE%T%TIME:~0,8%Z
+        CALL :LOADUTCNOW
 	echo %currentTime%>lastRun.timestamp
 )
 
 rem Avgör tidsintervall
 set /p startTime=<lastRun.timestamp
-set stopTime=%DATE%T%TIME:~0,8%Z
+CALL :LOADUTCNOW
+set stopTime=%currentTime%
 
 java -jar %jarpath% ListChanges_xl -Prange^=%startTime%,%stopTime% | java -jar %jarpath% GetRecords_xl > export.txt
 
@@ -29,3 +30,23 @@ echo %stopTime%>lastRun.timestamp
 
 rem DINA ÄNDRINGAR HÄR, gör något produktivt med datat i 'export.txt', t ex:
 rem Type export.txt
+
+:LOADUTCNOW
+for /f %%x in ('wmic path win32_utctime get /format:list ^| findstr "="') do set %%x
+IF [%Month:~1,1%] == [] (
+   set Month=0%Month%
+)
+IF [%Day:~1,1%] == [] (
+   set Day=0%Day%
+)
+IF [%Hour:~1,1%] == [] (
+   set Hour=0%Hour%
+)
+IF [%Minute:~1,1%] == [] (
+   set Minute=0%Minute%
+)
+IF [%Second:~1,1%] == [] (
+   set Second=0%Second%
+)
+set currentTime=%Year%-%Month%-%Day%T%Hour%:%Minute%:%Second%Z
+EXIT /B 0

@@ -23,12 +23,12 @@ fi
 LASTRUNTIMEPATH="lastRun.timestamp"
 if [ ! -e $LASTRUNTIMEPATH ]
 then
-    date +%Y-%m-%dT%H:%M:%SZ > $LASTRUNTIMEPATH
+    date -u +%Y-%m-%dT%H:%M:%SZ > $LASTRUNTIMEPATH
 fi
 
 # Avgör vilket tidsintervall vi ska hämta
 STARTTIME=`cat $LASTRUNTIMEPATH`
-STOPTIME=$(date +%Y-%m-%dT%H:%M:%SZ)
+STOPTIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
 java -jar $JARPATH ListChanges_xl -Prange=$STARTTIME,$STOPTIME | java -jar $JARPATH GetRecords_xl > export.txt
 
