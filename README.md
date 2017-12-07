@@ -25,6 +25,9 @@ Skapa en fil med bib_id:n för (1) ändrade bibposter, (2) bibposter med ändrad
 Skicka en en fil med bib_id (`fil.txt`) till exportprogrammet och spara posterna i `utfil.txt`
 
     # cat fil.txt | gradlew -q get_records_xl > utfil.txt
-    
+
+## Normal användning
+För att använda export-programmet i drift rekommenderar vi att man gör ändringar i något av skripten under exampelscripts (för att passa det lokala systemet). Dessa skript kan anropas kontinuerligt och hämtar då allt data som ändrats sedan föregående gång dom kördes. Förslagsvis schemaläggs dessa att köras varje minut. Det är VIKTIGT att den dator som kör skripten har en korrekt inställd klocka. Om datorns klocka går mer än 10 sekunder före den korrekta tiden så finns en risk att man missar ändringar som görs i Libris. Använd en NTP-server för att se till att datorns klocka går rätt.
+
 ## Genomföra en testexport
 [Guide för att genomföra en testexport](https://github.com/libris/export/blob/master/docs/manuell_export.md) givet en given exportprofil för att testa den senaste versionen av Libris XL
