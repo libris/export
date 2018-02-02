@@ -42,7 +42,7 @@ def getMerged(bib_id) {
   def record = getRecord(bib_id)
 
   if (record.metadata.record.size() == 0) {
-      System.err.println("WARNING - NO SUCH BIB_ID: " + bib_id);
+      System.err.println("WARNING - NO SUCH BIB_ID: " + bib_id)
       return []
   }
 
@@ -50,38 +50,22 @@ def getMerged(bib_id) {
 
   // filter out license or e-record?
   if (profile.filter(bib)) {
-    System.err.println("FILTERED: " + MergeRecords.format(bib));
+    System.err.println("FILTERED: " + MergeRecords.format(bib))
     return []
   } else {
-    System.err.println(MergeRecords.format(bib));
+    System.err.println(MergeRecords.format(bib))
   }
 
-  // Step 2 - find and get authority records
-  def auth_ids = []
-  record.metadata.record.datafield.subfield.each {
-    if (it.@code.text().equals("0") && (it.text().startsWith("https://id.kb.se/") || it.text().startsWith("https://libris.kb.se/"))) {
-      auth_ids.add(it.text())
-    }
-  }
-
-  def auths = new HashSet<MarcRecord>()
-  if (!profile.getProperty("authtype", "NONE").equalsIgnoreCase("NONE")) {
-    auth_ids.each { auth_id ->
-      getRecord(auth_id).metadata.record.each {
-        auths.add(MarcXmlRecordReader.fromXml(toXml(it)))
-      }
-    }
-  }
-
-  // Step 3 - get holdings records
+  // Step 2 - get holdings records
   def holdings = new TreeMap<String, MarcRecord>()
   if (!profile.getProperty("holdtype", "NONE").equalsIgnoreCase("NONE")) {
     record.about.holding.each { holding ->
-      holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(getRecord("${config.URIBase}" + holding.@id.toString()).metadata.record)))
+      //holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(getRecord("${config.URIBase}" + holding.@id.toString()).metadata.record)))
+      holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(holding.record)))
     }
   }
 
-  return profile.mergeRecord(bib, holdings, auths)
+  return profile.mergeRecord(bib, holdings, new HashSet<Object>())
 }
 
 def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML"))? new MarcXmlRecordWriter(System.out, profile.getProperty("characterencoding")):new Iso2709MarcRecordWriter(System.out, profile.getProperty("characterencoding"))
