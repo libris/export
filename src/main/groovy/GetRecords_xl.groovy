@@ -59,11 +59,18 @@ def getMerged(bib_id) {
   // Step 2 - get holdings records
   def holdings = new TreeMap<String, MarcRecord>()
   if (!profile.getProperty("holdtype", "NONE").equalsIgnoreCase("NONE")) {
+
+    String locations = profile.getProperty("locations", "")
+    HashSet locationSet = new HashSet(locations.split(" ").toList())
+
     record.about.holding.each { holding ->
-      //holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(getRecord("${config.URIBase}" + holding.@id.toString()).metadata.record)))
-      holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(holding.record)))
+      if (locationSet.contains( holding.@sigel.toString() ) || locationSet.contains("*"))
+        holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(holding.record)))
     }
   }
+
+  if (holdings.isEmpty())
+    bib.setLeader(5, 'd' as char)
 
   return profile.mergeRecord(bib, holdings, new HashSet<Object>())
 }

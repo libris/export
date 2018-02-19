@@ -24,6 +24,7 @@ CALL :LOADUTCNOW
 set stopTime=%currentTime%
 
 java -jar %jarpath% ListChanges_xl -Prange^=%startTime%,%stopTime% | java -jar %jarpath% GetRecords_xl > export.txt
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem Om allt gick bra, uppdatera tidsstämpeln
 echo %stopTime%>lastRun.timestamp
