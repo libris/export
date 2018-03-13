@@ -1,4 +1,4 @@
-OaiPmhBaseUrl="https://libris.kb.se/data/oaipmh/"
+OaiPmhBaseUrl="https://libris.kb.se/api/oaipmh/"
 URIBase="https://libris.kb.se/"
 User=""
 Password=""
