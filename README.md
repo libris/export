@@ -4,8 +4,9 @@ Librisexport via OAI-PMH. Det här programmet erbjuder en metod för att hålla 
 
 ## Systemkrav
 
-* Java 6+ JDK (Java Development Kit). Java JRE är ej tillräckligt.
+* Java 8+ JDK (Java Development Kit). Java JRE är ej tillräckligt.
 * En korrekt inställd klocka. Det är mycket viktigt att den dator som kör skripten/programmet har en korrekt inställd klocka. Det finns en säkerhetsmarginal på 10 sekunder, men om datorns klocka går mer än 10 sekunder före den korrekta tiden så finns en risk att man missar ändringar som görs i Libris. Använd en NTP-server för att se till att datorns klocka går rätt.
+* För att använda exempelskripten på OSX krävs också programmet flock (kan installeras med Homebrew: `brew install flock`)
 
 
 ## Uppsättning
