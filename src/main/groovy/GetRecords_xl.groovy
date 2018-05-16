@@ -2,6 +2,7 @@ System.err.println "DEBUG: " + new Date()
 System.err.println "DEBUG: " + System.getProperty("user.dir")
 
 import se.kb.libris.util.marc.*
+import se.kb.libris.util.marc.impl.DatafieldImpl
 import se.kb.libris.util.marc.io.*
 import se.kb.libris.export.ExportProfile
 import se.kb.libris.export.MergeRecords
@@ -56,7 +57,21 @@ def getMerged(bib_id) {
     System.err.println(MergeRecords.format(bib))
   }
 
-  // Step 2 - get holdings records
+  // Step 2 - find and get authority records
+  HashSet auths = new HashSet()
+  List<Field> fieldList = bib.getFields()
+  for (Field field : fieldList) {
+    if (field instanceof Datafield) {
+      Datafield datafield = field
+      List<Subfield> authlinkSubfields = datafield.getSubfields("0")
+      for (Subfield sf : authlinkSubfields) {
+        String authUrl = sf.getData().replaceAll("#it", "")
+        auths.add(MarcXmlRecordReader.fromXml(toXml(getRecord(authUrl).metadata.record)))
+      }
+    }
+  }
+
+  // Step 3 - get holdings records
   def holdings = new TreeMap<String, MarcRecord>()
   if (!profile.getProperty("holdtype", "NONE").equalsIgnoreCase("NONE")) {
 
@@ -72,7 +87,7 @@ def getMerged(bib_id) {
   if (holdings.isEmpty())
     bib.setLeader(5, 'd' as char)
 
-  return profile.mergeRecord(bib, holdings, new HashSet<Object>())
+  return profile.mergeRecord(bib, holdings, auths)
 }
 
 def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML"))? new MarcXmlRecordWriter(System.out, profile.getProperty("characterencoding")):new Iso2709MarcRecordWriter(System.out, profile.getProperty("characterencoding"))
