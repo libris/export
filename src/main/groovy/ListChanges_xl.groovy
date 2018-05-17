@@ -59,7 +59,7 @@ def listHoldIdentifiers(from, until) {
         }
 
         data.ListIdentifiers.about.each { about ->
-            ret.add( about.itemOf.@id.toString() )
+            ret.add( about.itemOf.@id.toString().replaceAll("#it", "") )
         }
     }
 
