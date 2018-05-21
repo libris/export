@@ -136,7 +136,8 @@ public class DeweyMapper {
     }
 
     private static String getCacheFile() {
-        String defaultCacheFile = File.separator + "tmp" + File.separator + "dewey-sab.cache";
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        String defaultCacheFile = tmpDir + File.separator + "dewey-sab.cache";
         return System.getProperty("librisexport.deweysab_cachefile", defaultCacheFile);
     }
 
