@@ -34,7 +34,9 @@ def get(url) {
 
 def getRecord(id) {
   id = java.net.URLEncoder.encode(id, "UTF-8")
-  def url = "${config.OaiPmhBaseUrl}?verb=GetRecord&metadataPrefix=marcxml_includehold_expanded&identifier=${id}&x-withDeletedData=true"
+  def url = "${config.OaiPmhBaseUrl}?verb=GetRecord&metadataPrefix=marcxml_includehold_expanded&identifier=${id}"
+  if (config.IncludeDeletions == true)
+    url = "${config.OaiPmhBaseUrl}?verb=GetRecord&metadataPrefix=marcxml_includehold_expanded&identifier=${id}&x-withDeletedData=true"
   return xml = new XmlSlurper(false, false).parseText(get(url)).GetRecord.record
 }
 
@@ -84,7 +86,7 @@ def getMerged(bib_id) {
     }
   }
 
-  if (holdings.isEmpty())
+  if (config.IncludeDeletions == true && holdings.isEmpty())
     bib.setLeader(5, 'd' as char)
 
   return profile.mergeRecord(bib, holdings, auths)

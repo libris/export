@@ -20,7 +20,7 @@ Exportprofilen reglerar vissa delar av hur export-filerna ska se ut, t ex ifall 
 
 ### Andra inställningar
 
-Ni behöver också skapa filen etc/config_xl.properties. I dom alra flesta fall räcker det att kopiera etc/config_xl.properties.in till etc/config_xl.properties, eftersom standardinställningarna bör vara korrekta. Vill man däremot hämta uppdateringar från någon av Libris testmiljöer behöver man ändra innehållet i den här filen.
+Ni behöver också skapa filen etc/config_xl.properties. I dom alra flesta fall räcker det att kopiera etc/config_xl.properties.in till etc/config_xl.properties, eftersom standardinställningarna bör vara korrekta. Vill man däremot hämta uppdateringar från någon av Libris testmiljöer behöver man ändra innehållet i den här filen. Detsamma gäller om man vill aktivera post-borttagning, dvs att poster som raderats ur libris också ska finnas med i utdata (med deleted-flagga satt). För att göra detta ändras inställningen ´IncludeDeletions=false´ till ´IncludeDeletions=true´. Detta medför även att bibliografiska poster för vilka man inte (längre) har bestånd kommer att dyka upp som deleted i utdata.
 
 ### Steg för steg
 
