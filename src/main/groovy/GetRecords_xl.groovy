@@ -86,8 +86,12 @@ def getMerged(bib_id) {
     }
   }
 
-  if (config.IncludeDeletions == true && holdings.isEmpty())
-    bib.setLeader(5, 'd' as char)
+  if (holdings.isEmpty()) {
+    if (config.IncludeDeletions == true)
+      bib.setLeader(5, 'd' as char)
+    else
+      return null // Do not export the non-relevant records at all
+  }
 
   return profile.mergeRecord(bib, holdings, auths)
 }
@@ -97,7 +101,9 @@ def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML
 System.in.eachLine() { line ->
   if (line.trim() != "") {
     getMerged(line).each {
-      record -> writer.writeRecord(record)
+          record ->
+          if (record != null)
+            writer.writeRecord(record)
     }
   }
 }
