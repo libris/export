@@ -68,7 +68,12 @@ def getMerged(bib_id) {
       List<Subfield> authlinkSubfields = datafield.getSubfields("0")
       for (Subfield sf : authlinkSubfields) {
         String authUrl = sf.getData().replaceAll("#it", "")
-        auths.add(MarcXmlRecordReader.fromXml(toXml(getRecord(authUrl).metadata.record)))
+        def authRecord = getRecord(authUrl).metadata.record
+        if (!authRecord.isEmpty()) {
+            auths.add(MarcXmlRecordReader.fromXml(toXml(authRecord)))
+        } else {
+            System.err.println("WARN: Auth record ${authUrl} for bib id ${bib_id} not found, skipping..")
+        }
       }
     }
   }
