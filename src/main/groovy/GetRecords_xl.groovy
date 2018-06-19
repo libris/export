@@ -45,7 +45,7 @@ def getMerged(bib_id) {
   def record = getRecord(bib_id)
 
   if (record.metadata.record.size() == 0) {
-      System.err.println("WARNING - NO SUCH BIB_ID: " + bib_id)
+      System.err.println("WARNING: NO SUCH BIB_ID  " + bib_id)
       return []
   }
 
@@ -56,7 +56,7 @@ def getMerged(bib_id) {
     System.err.println("FILTERED: " + MergeRecords.format(bib))
     return []
   } else {
-    System.err.println(MergeRecords.format(bib))
+    System.err.println('OK: ' + MergeRecords.format(bib))
   }
 
   // Step 2 - find and get authority records
@@ -72,7 +72,7 @@ def getMerged(bib_id) {
         if (!authRecord.isEmpty()) {
             auths.add(MarcXmlRecordReader.fromXml(toXml(authRecord)))
         } else {
-            System.err.println("WARN: Auth record ${authUrl} for bib id ${bib_id} not found, skipping..")
+            System.err.println("WARNING: Auth record ${authUrl} for bib id ${bib_id} not found, skipping..")
         }
       }
     }
@@ -86,12 +86,18 @@ def getMerged(bib_id) {
     HashSet locationSet = new HashSet(locations.split(" ").toList())
 
     record.about.holding.each { holding ->
-      if (locationSet.contains( holding.@sigel.toString() ) || locationSet.contains("*"))
-        holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(holding.record)))
+      try {
+        if (locationSet.contains( holding.@sigel.toString() ) || locationSet.contains("*"))
+          holdings.put(holding.@sigel.toString(), MarcXmlRecordReader.fromXml(toXml(holding.record)))
+      } catch (Exception e) {
+        System.err.println("WARNING: Exception while adding hold record to bib ${bib_id}, record=${holding}")
+        System.err.println(e.getMessage())
+        e.printStackTrace()
+      }
     }
   }
 
-  if (holdings.isEmpty()) {
+  if (holdings.isEmpty() || locationSet.contains("*")) {
     if (config.IncludeDeletions == true)
       bib.setLeader(5, 'd' as char)
     else
@@ -105,10 +111,17 @@ def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML
 
 System.in.eachLine() { line ->
   if (line.trim() != "") {
-    getMerged(line).each {
-          record ->
-          if (record != null)
-            writer.writeRecord(record)
+    try {
+      getMerged(line).each {
+            record ->
+
+            if (record != null)
+              writer.writeRecord(record)
+      }
+    } catch (Exception e) {
+        System.err.println("WARNING: Exception while merging bib ${line}")
+        System.err.println(e.getMessage())
+        e.printStackTrace()
     }
   }
 }
