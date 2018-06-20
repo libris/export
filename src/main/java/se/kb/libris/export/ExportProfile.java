@@ -729,6 +729,12 @@ public class ExportProfile {
 
         ret.add(bibRecord);
 
+        // remove any existing 003
+        ListIterator li = bibRecord.listIterator();
+        while (li.hasNext())
+          if (((Field)li.next()).getTag().equals("003"))
+	     li.remove();
+
         // add 003 to bib record
         bibRecord.addField(bibRecord.createControlfield("003", getProperty("f003", "SE-LIBR")), MarcFieldComparator.strictSorted);
 
