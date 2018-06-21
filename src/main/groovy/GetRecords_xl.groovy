@@ -80,11 +80,10 @@ def getMerged(bib_id) {
 
   // Step 3 - get holdings records
   def holdings = new TreeMap<String, MarcRecord>()
+  String locations = profile.getProperty("locations", "")
+  HashSet locationSet = new HashSet(locations.split(" ").toList())
   if (!profile.getProperty("holdtype", "NONE").equalsIgnoreCase("NONE")) {
-
-    String locations = profile.getProperty("locations", "")
-    HashSet locationSet = new HashSet(locations.split(" ").toList())
-
+    
     record.about.holding.each { holding ->
       try {
         if (locationSet.contains( holding.@sigel.toString() ) || locationSet.contains("*"))
