@@ -83,7 +83,7 @@ def getMerged(bib_id) {
   String locations = profile.getProperty("locations", "")
   HashSet locationSet = new HashSet(locations.split(" ").toList())
   if (!profile.getProperty("holdtype", "NONE").equalsIgnoreCase("NONE")) {
-    
+
     record.about.holding.each { holding ->
       try {
         if (locationSet.contains( holding.@sigel.toString() ) || locationSet.contains("*"))
@@ -106,7 +106,12 @@ def getMerged(bib_id) {
   return profile.mergeRecord(bib, holdings, auths)
 }
 
-def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML"))? new MarcXmlRecordWriter(System.out, profile.getProperty("characterencoding")):new Iso2709MarcRecordWriter(System.out, profile.getProperty("characterencoding"))
+// Enough with the "Latin1Strip" already.
+def encoding = profile.getProperty("characterencoding")
+if (encoding.equals("Latin1Strip"))
+  encoding = "ISO-8859-1"
+
+def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML"))? new MarcXmlRecordWriter(System.out, encoding):new Iso2709MarcRecordWriter(System.out, profile.getProperty("characterencoding"))
 
 System.in.eachLine() { line ->
   if (line.trim() != "") {
