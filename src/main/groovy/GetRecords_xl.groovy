@@ -106,12 +106,15 @@ def getMerged(bib_id) {
   return profile.mergeRecord(bib, holdings, auths)
 }
 
-// Enough with the "Latin1Strip" already.
+// Replace unknown "Latin1Strip" encoding.
 def encoding = profile.getProperty("characterencoding")
-if (encoding.equals("Latin1Strip"))
+if (encoding.equals("Latin1Strip")) {
   encoding = "ISO-8859-1"
+}
 
-def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML"))? new MarcXmlRecordWriter(System.out, encoding):new Iso2709MarcRecordWriter(System.out, profile.getProperty("characterencoding"))
+def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML")) ?
+             new MarcXmlRecordWriter(System.out, encoding) :
+             new Iso2709MarcRecordWriter(System.out, encoding)
 
 System.in.eachLine() { line ->
   if (line.trim() != "") {
