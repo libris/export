@@ -16,33 +16,18 @@ public class ExportProfile {
     public ExportProfile() {
     }
 
-    public ExportProfile(Properties properties) {
-        this.properties = properties;
-
-        for (String extra: properties.getProperty("extrafields", "").split(";")) {
-            if (extra.trim().equals("")) continue;
-            String sigel = extra.trim().split(":")[0].trim();
-            String fields[] = extra.trim().split(":")[1].trim().split(",");
-            String f = null;
-
-            for (int i=0;i<fields.length;i++) {
-                if (f == null) {
-                    f = fields[i].trim();
-                } else {
-                    f += "|" + fields[i].trim();
-                }
-            }
-
-            if (f != null) {
-                extraFields.put(sigel, f);
-            }
-        }
-    }
-
     public ExportProfile(File file) throws IOException {
         properties.load(new FileInputStream(file));
+        configure();
+    }
 
-        for (String extra: properties.getProperty("extrafields").split(";")) {
+    public ExportProfile(Properties properties) {
+        this.properties = properties;
+        configure();
+    }
+
+    void configure() {
+        for (String extra: properties.getProperty("extrafields", "").split(";")) {
             if (extra.trim().equals("")) continue;
             String sigel = extra.trim().split(":")[0].trim();
             String fields[] = extra.trim().split(":")[1].trim().split(",");
