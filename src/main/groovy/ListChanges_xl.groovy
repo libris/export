@@ -80,12 +80,17 @@ def getChangedRecords(from, until) {
 
 def from = args[0], until = args.size()==2? args[1]:"2150-01-01T00:00:00Z"
 
+try {
 // Move the from-time back a little, to compensate for the possibility of clients running with early clocks.
-ZonedDateTime fromTime = ZonedDateTime.parse(from)
-fromTime = fromTime.minusSeconds(10)
-from = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(fromTime)
+    ZonedDateTime fromTime = ZonedDateTime.parse(from)
+    fromTime = fromTime.minusSeconds(10)
+    from = DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(fromTime)
 
-System.err.println "DEBUG: from:${from} until:${until}"
+    System.err.println "DEBUG: from:${from} until:${until}"
 
-for (String id: getChangedRecords(from, until))
-    println id
+    for (String id : getChangedRecords(from, until))
+        println id
+} catch (Throwable t) {
+    System.err.println(t)
+    System.exit(1)
+}

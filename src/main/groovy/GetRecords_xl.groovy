@@ -116,21 +116,20 @@ def writer = (profile.getProperty("format", "ISO2709").equalsIgnoreCase("MARCXML
              new MarcXmlRecordWriter(System.out, encoding) :
              new Iso2709MarcRecordWriter(System.out, encoding)
 
-System.in.eachLine() { line ->
-  if (line.trim() != "") {
-    try {
-      getMerged(line).each {
-            record ->
+try {
 
-            if (record != null)
-              writer.writeRecord(record)
+  System.in.eachLine() { line ->
+    if (line.trim() != "") {
+      getMerged(line).each {
+        record ->
+          if (record != null)
+            writer.writeRecord(record)
       }
-    } catch (Exception e) {
-        System.err.println("WARNING: Exception while merging bib ${line}")
-        System.err.println(e.getMessage())
-        e.printStackTrace()
     }
   }
-}
 
-writer.close()
+  writer.close()
+} catch (Throwable t) {
+  System.err.println(t)
+  System.exit(2)
+}
