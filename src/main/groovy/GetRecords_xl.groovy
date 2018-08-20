@@ -49,6 +49,11 @@ def getMerged(bib_id) {
       return []
   }
 
+  Set<String> biboperators = profile.getSet("biboperators")
+  if ( !biboperators.isEmpty() && !biboperators.contains( record.about.agent.@name.toString() )) {
+    return []
+  }
+
   def bib = MarcXmlRecordReader.fromXml(toXml(record.metadata.record))
 
   // filter out license or e-record?
