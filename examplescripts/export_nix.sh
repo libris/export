@@ -30,7 +30,8 @@ fi
 STARTTIME=`cat $LASTRUNTIMEPATH`
 STOPTIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-java -jar $JARPATH ListChanges_xl -Prange=$STARTTIME,$STOPTIME | java -jar $JARPATH GetRecords_xl > export.txt
+java -jar $JARPATH ListChanges_xl -Prange=$STARTTIME,$STOPTIME > bibids
+java -jar $JARPATH GetRecords_xl > export.txt < bibids
 
 # Om allt gick bra, uppdatera tidsstämpeln
 echo $STOPTIME > $LASTRUNTIMEPATH

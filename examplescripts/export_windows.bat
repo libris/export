@@ -23,7 +23,10 @@ set /p startTime=<lastRun.timestamp
 CALL :LOADUTCNOW
 set stopTime=%currentTime%
 
-java -jar %jarpath% ListChanges_xl -Prange^=%startTime%,%stopTime% | java -jar %jarpath% GetRecords_xl > export.txt
+java -jar %jarpath% ListChanges_xl -Prange^=%startTime%,%stopTime% > bibids
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+java -jar %jarpath% GetRecords_xl > export.txt < bibids
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 rem Om allt gick bra, uppdatera tidsstämpeln
