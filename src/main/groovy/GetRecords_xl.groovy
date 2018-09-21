@@ -96,11 +96,13 @@ def getMerged(bib_id) {
     }
   }
 
-  if (holdings.isEmpty() || locationSet.contains("*")) {
-    if (config.IncludeDeletions == true)
-      bib.setLeader(5, 'd' as char)
-    else
-      return null // Do not export the non-relevant records at all
+  if ( ! locationSet.contains("*") ) {
+    if (holdings.isEmpty()) {
+      if (config.IncludeDeletions == true)
+        bib.setLeader(5, 'd' as char)
+      else
+        return null // Do not export the non-relevant records at all
+    }
   }
 
   return profile.mergeRecord(bib, holdings, auths)

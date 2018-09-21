@@ -45,7 +45,6 @@ def assertExported(record001, failureMessage):
         dump = fh.read()
     xmlDump = ET.fromstring(dump)
     for elem in xmlDump.findall("{http://www.loc.gov/MARC21/slim}record/{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"):
-        print (elem.text)
         if elem.text == record001:
             return
     failedCases.append(failureMessage)
@@ -55,7 +54,6 @@ def assertNotExported(record001, failureMessage):
         dump = fh.read()
     xmlDump = ET.fromstring(dump)
     for elem in xmlDump.findall("{http://www.loc.gov/MARC21/slim}record/{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"):
-        print (elem.text)
         if elem.text == record001:
             failedCases.append(failureMessage)
     return
@@ -98,6 +96,22 @@ setModified("tttttttttttttttt", "2150-01-01 12:00:00") # out of range
 setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
 doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
 assertExported("tttttttttttttttt", "Test 2")
+
+# Only bib was updated bib should be exported
+reset()
+importBib(bibtemplate, "SEK", "tttttttttttttttt")
+importHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK")
+setModified("tttttttttttttttt", "2250-01-01 12:00:00")
+setModified("hhhhhhhhhhhhhhhh", "2150-01-01 12:00:00") # out of range
+doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+assertExported("tttttttttttttttt", "Test 3")
+
+# Updated bib without hold, should be exported when locations=*
+reset()
+importBib(bibtemplate, "SEK", "tttttttttttttttt")
+setModified("tttttttttttttttt", "2250-01-01 12:00:00")
+doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "default_ALL")
+assertExported("tttttttttttttttt", "Test 4")
 
 
 ########## SUMMARY ##########
