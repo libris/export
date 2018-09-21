@@ -40,15 +40,25 @@ def doExport(fromTime, toTime, profileName):
     os.system("java -jar export.jar ListChanges_xl -Prange={},{} > bibids".format(fromTime, toTime))
     os.system("java -jar export.jar GetRecords_xl > export.dump < bibids")
 
-def checkExport(containsId):
+def assertExported(record001, failureMessage):
     with open('export.dump') as fh:
         dump = fh.read()
-    xmlRecord = ET.fromstring(dump)
-    for elem in xmlRecord.findall("{http://www.loc.gov/MARC21/slim}record/controlfield[@tag='001']"):
-        Print (elem)
-        if elem == containsId:
-            Print ("SUCCESS")
-    #return False
+    xmlDump = ET.fromstring(dump)
+    for elem in xmlDump.findall("{http://www.loc.gov/MARC21/slim}record/{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"):
+        print (elem.text)
+        if elem.text == record001:
+            return
+    failedCases.append(failureMessage)
+
+def assertNotExported(record001, failureMessage):
+    with open('export.dump') as fh:
+        dump = fh.read()
+    xmlDump = ET.fromstring(dump)
+    for elem in xmlDump.findall("{http://www.loc.gov/MARC21/slim}record/{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"):
+        print (elem.text)
+        if elem.text == record001:
+            failedCases.append(failureMessage)
+    return
     
 ## Init
 
@@ -67,8 +77,9 @@ with open("./etc/config_xl.properties", "w") as fh:
     fh.write('OaiPmhBaseUrl="http://localhost:8080/oaipmh/"\n')
     fh.write('URIBase="{}"\n'.format(base_uri))
 
+failedCases = []
     
-## TESTCASES
+########## TESTCASES ##########
 
 # Normal new bib and hold should show up in export
 reset()
@@ -77,4 +88,23 @@ importHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK")
 setModified("tttttttttttttttt", "2250-01-01 12:00:00")
 setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
 doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
-checkExport("tttttttttttttttt")
+assertExported("tttttttttttttttt", "Test 1")
+
+# Only hold was updated bib should be exported
+reset()
+importBib(bibtemplate, "SEK", "tttttttttttttttt")
+importHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK")
+setModified("tttttttttttttttt", "2150-01-01 12:00:00") # out of range
+setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+assertExported("tttttttttttttttt", "Test 2")
+
+
+########## SUMMARY ##########
+
+if not failedCases:
+    print("*** ALL TESTS OK!")
+else:
+    print("*** THERE WERE FAILED TESTS:")
+    for message in failedCases:
+        print(message)
