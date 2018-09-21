@@ -97,7 +97,7 @@ def getMerged(bib_id) {
   }
 
   if ( ! locationSet.contains("*") ) {
-    if (holdings.isEmpty()) {
+    if (holdings.isEmpty() && !profile.getProperty("holdtype", "NONE").equalsIgnoreCase("NONE")) {
       if (config.IncludeDeletions == true)
         bib.setLeader(5, 'd' as char)
       else

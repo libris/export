@@ -113,6 +113,15 @@ setModified("tttttttttttttttt", "2250-01-01 12:00:00")
 doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "default_ALL")
 assertExported("tttttttttttttttt", "Test 4")
 
+# holdtype=none must not result in empty exports
+reset()
+importBib(bibtemplate, "SEK", "tttttttttttttttt")
+importHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK")
+setModified("tttttttttttttttt", "2250-01-01 12:00:00")
+setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "hold_none_SEK")
+assertExported("tttttttttttttttt", "Test 5")
+
 
 ########## SUMMARY ##########
 
