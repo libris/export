@@ -34,8 +34,16 @@ def importHold(jsonstring, agent, systemid, itemof, sigel):
 def setModified(systemid, timestring):
     os.system("psql whelk_dev -c 'update lddb set modified = $${}$$ where id = $${}$$;'".format(timestring, systemid))
     os.system("psql whelk_dev -c 'update lddb set depMaxModified = $${}$$ where id = $${}$$;'".format(timestring, systemid))
+
+def setDeleted(systemid):
+    os.system("psql whelk_dev -c 'update lddb set deleted = true where id = $${}$$;'".format(systemid))
     
-def doExport(fromTime, toTime, profileName):
+def doExport(fromTime, toTime, profileName, includeDeletions=False):
+    with open("./etc/config_xl.properties", "w") as fh:
+        fh.write('OaiPmhBaseUrl="http://localhost:8080/oaipmh/"\n')
+        fh.write('URIBase="{}"\n'.format(base_uri))
+        if includeDeletions:
+            fh.write('IncludeDeletions=true\n')
     os.system("cp -f ./testdata/profiles/{}.properties ./etc/export.properties".format(profileName))
     os.system("java -jar export.jar ListChanges_xl -Prange={},{} > bibids".format(fromTime, toTime))
     os.system("java -jar export.jar GetRecords_xl > export.dump < bibids")
@@ -70,10 +78,6 @@ os.system("./gradlew jar")
 os.system("cp build/libs/export-3.0.0-alpha.jar ./integtest/export.jar")
 os.chdir("integtest")
 os.system("mkdir -p ./etc")
-
-with open("./etc/config_xl.properties", "w") as fh:
-    fh.write('OaiPmhBaseUrl="http://localhost:8080/oaipmh/"\n')
-    fh.write('URIBase="{}"\n'.format(base_uri))
 
 failedCases = []
     
@@ -121,6 +125,16 @@ setModified("tttttttttttttttt", "2250-01-01 12:00:00")
 setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
 doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "hold_none_SEK")
 assertExported("tttttttttttttttt", "Test 5")
+
+# Hold for sigel was deleted and includeDeletions=True, bib should be deleted
+reset()
+importBib(bibtemplate, "SEK", "tttttttttttttttt")
+importHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK")
+setModified("tttttttttttttttt", "2150-01-01 12:00:00") # out of range
+setDeleted("hhhhhhhhhhhhhhhh")
+setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK", includeDeletions=True)
+assertExported("tttttttttttttttt", "Test 6")
 
 
 ########## SUMMARY ##########
