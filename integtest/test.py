@@ -1,11 +1,12 @@
 # NEVER RUN THIS TEST CASE ON AN ENVIRONMENT WHERE THE DATA MATTERS!
-# These tests are not portable. They require a locally running OAIPMH server on http://localhost:8080/oaipmh/, tied to a local postgresql instance which can be logged into (with full rights) using psql -qAt whelk_dev
+# These tests are not portable.
 
 import os
 import json
 import xml.etree.ElementTree as ET
 
 base_uri = 'http://kblocalhost.kb.se:5000/'
+export_url = 'http://localhost:8080/marc_export/'
     
 ## Util-stuff
     
@@ -37,20 +38,17 @@ def setModified(systemid, timestring):
 
 def setDeleted(systemid):
     os.system("psql whelk_dev -c 'update lddb set deleted = true where id = $${}$$;'".format(systemid))
-    
-def doExport(fromTime, toTime, profileName, includeDeletions=False):
-    with open("./etc/config_xl.properties", "w") as fh:
-        fh.write('OaiPmhBaseUrl="http://localhost:8080/oaipmh/"\n')
-        fh.write('URIBase="{}"\n'.format(base_uri))
-        if includeDeletions:
-            fh.write('IncludeDeletions=true\n')
-    os.system("cp -f ./testdata/profiles/{}.properties ./etc/export.properties".format(profileName))
-    os.system("java -jar export.jar ListChanges_xl -Prange={},{} > bibids".format(fromTime, toTime))
-    os.system("java -jar export.jar GetRecords_xl > export.dump < bibids")
+
+def doExport(fromTime, toTime, profileName):
+    print('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
+    os.system('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
 
 def assertExported(record001, failureMessage):
     with open('export.dump') as fh:
         dump = fh.read()
+    if not dump:
+        failedCases.append(failureMessage)
+        return
     xmlDump = ET.fromstring(dump)
     for elem in xmlDump.findall("{http://www.loc.gov/MARC21/slim}record/{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"):
         if elem.text == record001:
@@ -60,6 +58,8 @@ def assertExported(record001, failureMessage):
 def assertNotExported(record001, failureMessage):
     with open('export.dump') as fh:
         dump = fh.read()
+    if not dump:
+        return
     xmlDump = ET.fromstring(dump)
     for elem in xmlDump.findall("{http://www.loc.gov/MARC21/slim}record/{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"):
         if elem.text == record001:
@@ -72,12 +72,6 @@ with open('testdata/bib0.jsonld') as fh:
     bibtemplate = fh.read()
 with open('testdata/hold0.jsonld') as fh:
     holdtemplate = fh.read()
-
-os.chdir("..")
-os.system("./gradlew jar")
-os.system("cp build/libs/export-3.0.0-alpha.jar ./integtest/export.jar")
-os.chdir("integtest")
-os.system("mkdir -p ./etc")
 
 failedCases = []
     
@@ -125,17 +119,6 @@ setModified("tttttttttttttttt", "2250-01-01 12:00:00")
 setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
 doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "hold_none_SEK")
 assertExported("tttttttttttttttt", "Test 5")
-
-# Hold for sigel was deleted and includeDeletions=True, bib should be deleted
-reset()
-importBib(bibtemplate, "SEK", "tttttttttttttttt")
-importHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK")
-setModified("tttttttttttttttt", "2150-01-01 12:00:00") # out of range
-setDeleted("hhhhhhhhhhhhhhhh")
-setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
-doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK", includeDeletions=True)
-assertExported("tttttttttttttttt", "Test 6")
-
 
 ########## SUMMARY ##########
 
