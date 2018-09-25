@@ -19,6 +19,7 @@ def importBib(jsonstring, agent, systemid):
     jsonstring = jsonstring.replace("TEMPID", systemid)
     jsonstring = jsonstring.replace("TEMPBASEURI", base_uri)
     os.system("psql whelk_dev -c 'insert into lddb values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'bib', 'integtest', agent, '0'))
+    os.system("psql whelk_dev -c 'insert into lddb__versions (id, data, collection, changedIn, changedBy, checksum) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'bib', 'integtest', agent, '0'))
     os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid, '0', 'true'))
     os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid+'#it', '1', 'true'))
 
@@ -28,6 +29,7 @@ def importHold(jsonstring, agent, systemid, itemof, sigel):
     jsonstring = jsonstring.replace("TEMPITEMOF", itemof)
     jsonstring = jsonstring.replace("TEMPSIGEL", sigel)
     os.system("psql whelk_dev -c 'insert into lddb values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'hold', 'integtest', agent, '0'))
+    os.system("psql whelk_dev -c 'insert into lddb__versions (id, data, collection, changedIn, changedBy, checksum) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'hold', 'integtest', agent, '0'))
     os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid, '0', 'true'))
     os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid+'#it', '1', 'true'))
     os.system("psql whelk_dev -c 'insert into lddb__dependencies (id, relation, dependsOnId) values($${}$$, $${}$$, $${}$$);'".format(systemid, 'itemOf', itemof))
@@ -64,6 +66,7 @@ def assertNotExported(record001, failureMessage):
     for elem in xmlDump.findall("{http://www.loc.gov/MARC21/slim}record/{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"):
         if elem.text == record001:
             failedCases.append(failureMessage)
+            return
     return
     
 ## Init
@@ -119,6 +122,16 @@ setModified("tttttttttttttttt", "2250-01-01 12:00:00")
 setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
 doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "hold_none_SEK")
 assertExported("tttttttttttttttt", "Test 5")
+
+# New bib with ony hold for other sigel, should not be exported
+reset()
+importBib(bibtemplate, "SEK", "tttttttttttttttt")
+importHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "INTESEK")
+setModified("tttttttttttttttt", "2250-01-01 12:00:00")
+setModified("hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+assertNotExported("tttttttttttttttt", "Test 6")
+
 
 ########## SUMMARY ##########
 
