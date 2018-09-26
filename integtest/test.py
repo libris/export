@@ -88,7 +88,7 @@ failedCases = []
 reset()
 newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
-doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
 assertExported("tttttttttttttttt", "Test 1")
 
 # Only new hold in interval, bib should be exported
@@ -142,6 +142,53 @@ newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "215
 updateRecord("INTESEK", "tttttttttttttttt", "2250-01-01 12:00:00")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_SEK")
 assertNotExported("tttttttttttttttt", "Test 7")
+
+# holdoperators=SEK and hold-update by INTESEK should not lead to export
+# Normal new bib and hold should show up in export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+updateRecord("INTESEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_SEK")
+assertNotExported("tttttttttttttttt", "Test 8")
+
+# *create=on, *update=off and hold-update should not lead to export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_only_create_SEK")
+assertNotExported("tttttttttttttttt", "Test 9")
+
+# *create=on, *update=off and hold create should lead to export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_only_create_SEK")
+assertExported("tttttttttttttttt", "Test 10")
+
+# *create=off, *update=on and hold-update should lead to export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_only_update_SEK")
+assertExported("tttttttttttttttt", "Test 11")
+
+# *create=off, *update=on and bib-update should lead to export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+updateRecord("SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_only_update_SEK")
+assertExported("tttttttttttttttt", "Test 12")
+
+# *create=off, *update=on and no updates should not lead to export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_only_update_SEK")
+assertNotExported("tttttttttttttttt", "Test 13")
 
 
 ########## SUMMARY ##########
