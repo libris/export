@@ -39,8 +39,8 @@ def updateRecord(agent, systemid, timestring):
     os.system("psql whelk_dev -c 'insert into lddb__versions (id, data, collection, changedIn, checksum, changedBy, modified) select id, data, collection, changedIn, checksum, $${}$$ as changedBy, $${}$$ as modified from lddb where id = $${}$$;'".format(agent, timestring, systemid))
     os.system("psql whelk_dev -c 'update lddb set modified = $${}$$, changedBy = $${}$$ where id = $${}$$;'".format(timestring, agent, systemid))
 
-def setModified(systemid, timestring):
-    os.system("psql whelk_dev -c 'update lddb set modified = $${}$$ where id = $${}$$;'".format(timestring, systemid))
+#def setModified(systemid, timestring):
+#    os.system("psql whelk_dev -c 'update lddb set modified = $${}$$ where id = $${}$$;'".format(timestring, systemid))
 
 def setDeleted(systemid):
     os.system("psql whelk_dev -c 'update lddb set deleted = true where id = $${}$$;'".format(systemid))
@@ -91,39 +91,57 @@ newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "225
 doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
 assertExported("tttttttttttttttt", "Test 1")
 
-# Only hold was updated bib should be exported
+# Only new hold in interval, bib should be exported
 reset()
 newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
-doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
 assertExported("tttttttttttttttt", "Test 2")
 
-# Only bib was updated bib should be exported
+# Only bib was updated, bib should be exported
 reset()
-newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
-doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+updateRecord("SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
 assertExported("tttttttttttttttt", "Test 3")
 
-# Updated bib without hold, should be exported when locations=*
+# Only hold was updated, bib should be exported
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+assertExported("tttttttttttttttt", "Test 3-2")
+
+# New bib without hold, should be exported when locations=*
 reset()
 newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
-doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "default_ALL")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "default_ALL")
 assertExported("tttttttttttttttt", "Test 4")
 
 # holdtype=none must not result in empty exports
 reset()
 newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
-doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "hold_none_SEK")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "hold_none_SEK")
 assertExported("tttttttttttttttt", "Test 5")
 
 # New bib with ony hold for other sigel, should not be exported
 reset()
 newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "INTESEK", "2250-01-01 12:00:00")
-doExport("2250-01-01T11:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
 assertNotExported("tttttttttttttttt", "Test 6")
+
+# biboperators=SEK and bib-update by INTESEK should not lead to export
+# Normal new bib and hold should show up in export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+updateRecord("INTESEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_SEK")
+assertNotExported("tttttttttttttttt", "Test 7")
 
 
 ########## SUMMARY ##########
