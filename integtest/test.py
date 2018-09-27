@@ -12,7 +12,7 @@ export_url = 'http://localhost:8080/marc_export/'
     
 def reset():
     os.system("psql whelk_dev -c \"delete from lddb__identifiers where id in (select id from lddb where changedIn = 'integtest');\"")
-    os.system("psql whelk_dev -c \"delete from lddb__versions where id in (select id from lddb where changedIn = 'integtest');\"")
+    os.system("psql whelk_dev -c \"delete from lddb__versions where changedIn = 'integtest';\"")
     os.system("psql whelk_dev -c \"delete from lddb__dependencies where id in (select id from lddb where changedIn = 'integtest');\"")
     os.system("psql whelk_dev -c \"delete from lddb where changedIn = 'integtest';\"")
 
@@ -41,6 +41,12 @@ def updateRecord(agent, systemid, timestring):
 
 #def setModified(systemid, timestring):
 #    os.system("psql whelk_dev -c 'update lddb set modified = $${}$$ where id = $${}$$;'".format(timestring, systemid))
+def relinkHolding(jsonstring, systemid, itemof, sigel):
+    jsonstring = jsonstring.replace("TEMPID", systemid)
+    jsonstring = jsonstring.replace("TEMPBASEURI", base_uri)
+    jsonstring = jsonstring.replace("TEMPITEMOF", itemof)
+    jsonstring = jsonstring.replace("TEMPSIGEL", sigel)
+    os.system("psql whelk_dev -c 'update lddb set data = $${}$$ where id = $${}$$;'".format(jsonstring, systemid))
 
 def setDeleted(systemid):
     os.system("psql whelk_dev -c 'update lddb set deleted = true where id = $${}$$;'".format(systemid))
@@ -190,6 +196,16 @@ newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "225
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_operator_only_update_SEK")
 assertNotExported("tttttttttttttttt", "Test 13")
 
+# Relinking holding should export both new and old bib
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newBib(bibtemplate, "SEK", "bbbbbbbbbbbbbbbb", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+relinkHolding(holdtemplate, "hhhhhhhhhhhhhhhh", "bbbbbbbbbbbbbbbb", "SEK")
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+assertExported("tttttttttttttttt", "Test 14")
+assertExported("bbbbbbbbbbbbbbbb", "Test 14")
 
 ########## SUMMARY ##########
 
