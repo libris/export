@@ -49,13 +49,16 @@ def relinkHolding(jsonstring, systemid, itemof, sigel):
 def setDeleted(systemid):
     os.system("psql whelk_dev -c 'update lddb set deleted = true where id = $${}$$;'".format(systemid))
 
-def doExport(fromTime, toTime, profileName, exportDeleted=False):
-    if not exportDeleted:
-        print('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
-        os.system('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
-    else:
-        print('curl -XPOST "{}?from={}&until={}&deleted=export" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
-        os.system('curl -XPOST "{}?from={}&until={}&deleted=export" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
+def doExport(fromTime, toTime, profileName, exportDeleted=False, virtualDeletions=False):
+    deleted="ignore"
+    if exportDeleted:
+        deleted="export"
+    virtual="false"
+    if virtualDeletions:
+        virtual="true"
+
+    print('curl -XPOST "{}?from={}&until={}&deleted={}&virtualDelete={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, deleted, virtual, profileName))
+    os.system('curl -XPOST "{}?from={}&until={}&deleted={}&virtualDelete={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, deleted, virtual, profileName))
 
 def assertExported(record001, failureMessage):
     with open('export.dump') as fh:
@@ -232,7 +235,15 @@ newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
 setDeleted("tttttttttttttttt")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK", exportDeleted=True)
-assertExported("tttttttttttttttt", "Test 16")
+assertExported("tttttttttttttttt", "Test 17")
+
+# Virtual delete when no holdings left
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
+setDeleted("hhhhhhhhhhhhhhhh")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK", exportDeleted=True, virtualDeletions=True)
+assertExported("tttttttttttttttt", "Test 18")
 
 
 ########## SUMMARY ##########
