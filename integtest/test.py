@@ -39,8 +39,6 @@ def updateRecord(agent, systemid, timestring):
     os.system("psql whelk_dev -c 'insert into lddb__versions (id, data, collection, changedIn, checksum, changedBy, modified) select id, data, collection, changedIn, checksum, $${}$$ as changedBy, $${}$$ as modified from lddb where id = $${}$$;'".format(agent, timestring, systemid))
     os.system("psql whelk_dev -c 'update lddb set modified = $${}$$, changedBy = $${}$$ where id = $${}$$;'".format(timestring, agent, systemid))
 
-#def setModified(systemid, timestring):
-#    os.system("psql whelk_dev -c 'update lddb set modified = $${}$$ where id = $${}$$;'".format(timestring, systemid))
 def relinkHolding(jsonstring, systemid, itemof, sigel):
     jsonstring = jsonstring.replace("TEMPID", systemid)
     jsonstring = jsonstring.replace("TEMPBASEURI", base_uri)
@@ -51,9 +49,13 @@ def relinkHolding(jsonstring, systemid, itemof, sigel):
 def setDeleted(systemid):
     os.system("psql whelk_dev -c 'update lddb set deleted = true where id = $${}$$;'".format(systemid))
 
-def doExport(fromTime, toTime, profileName):
-    print('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
-    os.system('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
+def doExport(fromTime, toTime, profileName, exportDeleted=False):
+    if not exportDeleted:
+        print('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
+        os.system('curl -XPOST "{}?from={}&until={}" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
+    else:
+        print('curl -XPOST "{}?from={}&until={}&deleted=export" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
+        os.system('curl -XPOST "{}?from={}&until={}&deleted=export" --data-binary @./testdata/profiles/{}.properties > export.dump'.format(export_url, fromTime, toTime, profileName))
 
 def assertExported(record001, failureMessage):
     with open('export.dump') as fh:
@@ -206,6 +208,32 @@ updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
 assertExported("tttttttttttttttt", "Test 14")
 assertExported("bbbbbbbbbbbbbbbb", "Test 14")
+
+# Hold was deleted and holddelete=on, bib should be exported
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 12:00:00")
+setDeleted("hhhhhhhhhhhhhhhh")
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+assertExported("tttttttttttttttt", "Test 15")
+
+# Deleted bib should not be exported when in ignore-mode
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
+setDeleted("tttttttttttttttt")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
+assertNotExported("tttttttttttttttt", "Test 16")
+
+# Deleted bib should be exported when deleted=export
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
+setDeleted("tttttttttttttttt")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK", exportDeleted=True)
+assertExported("tttttttttttttttt", "Test 16")
+
 
 ########## SUMMARY ##########
 
