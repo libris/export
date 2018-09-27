@@ -15,6 +15,7 @@ def reset():
     os.system("psql whelk_dev -c \"delete from lddb__versions where changedIn = 'integtest';\"")
     os.system("psql whelk_dev -c \"delete from lddb__dependencies where id in (select id from lddb where changedIn = 'integtest');\"")
     os.system("psql whelk_dev -c \"delete from lddb where changedIn = 'integtest';\"")
+    os.system("psql whelk_dev -c \"delete from lddb__embellished;\"")
 
 def newBib(jsonstring, agent, systemid, timestring):
     jsonstring = jsonstring.replace("TEMPID", systemid)
