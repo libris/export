@@ -9,48 +9,65 @@ base_uri = 'http://kblocalhost.kb.se:5000/'
 export_url = 'http://localhost:8080/marc_export/'
     
 ## Util-stuff
-    
+
+pendingSql = ""
+batchSql = True
+
+def queueSql(sql):
+    global pendingSql
+    pendingSql += sql
+    if not batchSql:
+        flushSql()
+
+def flushSql():
+    global pendingSql
+    if pendingSql:
+        os.system("psql whelk_dev -c '{}'".format(pendingSql))
+        pendingSql = ""
+
 def reset():
-    os.system("psql whelk_dev -c \"delete from lddb__identifiers where id in (select id from lddb where changedIn = 'integtest');\"")
-    os.system("psql whelk_dev -c \"delete from lddb__versions where changedIn = 'integtest';\"")
-    os.system("psql whelk_dev -c \"delete from lddb__dependencies where id in (select id from lddb where changedIn = 'integtest');\"")
-    os.system("psql whelk_dev -c \"delete from lddb where changedIn = 'integtest';\"")
-    os.system("psql whelk_dev -c \"delete from lddb__embellished;\"")
+    queueSql("delete from lddb__identifiers where id in (select id from lddb where changedIn = $$integtest$$);")
+    queueSql("delete from lddb__versions where changedIn = $$integtest$$;")
+    queueSql("delete from lddb__dependencies where id in (select id from lddb where changedIn = $$integtest$$);")
+    queueSql("delete from lddb where changedIn = $$integtest$$;")
+    queueSql("delete from lddb__embellished;")
 
 def newBib(jsonstring, agent, systemid, timestring):
     jsonstring = jsonstring.replace("TEMPID", systemid)
     jsonstring = jsonstring.replace("TEMPBASEURI", base_uri)
-    os.system("psql whelk_dev -c 'insert into lddb (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'bib', 'integtest', agent, '0', timestring, timestring))
-    os.system("psql whelk_dev -c 'insert into lddb__versions (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'bib', 'integtest', agent, '0', timestring, timestring))
-    os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid, '0', 'true'))
-    os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid+'#it', '1', 'true'))
+    queueSql("insert into lddb (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, jsonstring, 'bib', 'integtest', agent, '0', timestring, timestring))
+    queueSql("insert into lddb__versions (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, jsonstring, 'bib', 'integtest', agent, '0', timestring, timestring))
+    queueSql("insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, base_uri+systemid, '0', 'true'))
+    queueSql("insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, base_uri+systemid+'#it', '1', 'true'))
 
 def newHold(jsonstring, agent, systemid, itemof, sigel, timestring):
     jsonstring = jsonstring.replace("TEMPID", systemid)
     jsonstring = jsonstring.replace("TEMPBASEURI", base_uri)
     jsonstring = jsonstring.replace("TEMPITEMOF", itemof)
     jsonstring = jsonstring.replace("TEMPSIGEL", sigel)
-    os.system("psql whelk_dev -c 'insert into lddb (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'hold', 'integtest', agent, '0', timestring, timestring))
-    os.system("psql whelk_dev -c 'insert into lddb__versions (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, jsonstring, 'hold', 'integtest', agent, '0', timestring, timestring))
-    os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid, '0', 'true'))
-    os.system("psql whelk_dev -c 'insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);'".format(systemid, base_uri+systemid+'#it', '1', 'true'))
-    os.system("psql whelk_dev -c 'insert into lddb__dependencies (id, relation, dependsOnId) values($${}$$, $${}$$, $${}$$);'".format(systemid, 'itemOf', itemof))
+    queueSql("insert into lddb (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, jsonstring, 'hold', 'integtest', agent, '0', timestring, timestring))
+    queueSql("insert into lddb__versions (id, data, collection, changedIn, changedBy, checksum, modified, created) values($${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, jsonstring, 'hold', 'integtest', agent, '0', timestring, timestring))
+    queueSql("insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, base_uri+systemid, '0', 'true'))
+    queueSql("insert into lddb__identifiers (id, iri, graphIndex, mainId) values($${}$$, $${}$$, $${}$$, $${}$$);".format(systemid, base_uri+systemid+'#it', '1', 'true'))
+    queueSql("insert into lddb__dependencies (id, relation, dependsOnId) values($${}$$, $${}$$, $${}$$);".format(systemid, 'itemOf', itemof))
 
 def updateRecord(agent, systemid, timestring):
-    os.system("psql whelk_dev -c 'insert into lddb__versions (id, data, collection, changedIn, checksum, changedBy, modified) select id, data, collection, changedIn, checksum, $${}$$ as changedBy, $${}$$ as modified from lddb where id = $${}$$;'".format(agent, timestring, systemid))
-    os.system("psql whelk_dev -c 'update lddb set modified = $${}$$, changedBy = $${}$$ where id = $${}$$;'".format(timestring, agent, systemid))
+    queueSql("insert into lddb__versions (id, data, collection, changedIn, checksum, changedBy, modified) select id, data, collection, changedIn, checksum, $${}$$ as changedBy, $${}$$ as modified from lddb where id = $${}$$;".format(agent, timestring, systemid))
+    queueSql("update lddb set modified = $${}$$, changedBy = $${}$$ where id = $${}$$;".format(timestring, agent, systemid))
+    queueSql("delete from lddb__embellished;")
 
 def relinkHolding(jsonstring, systemid, itemof, sigel):
     jsonstring = jsonstring.replace("TEMPID", systemid)
     jsonstring = jsonstring.replace("TEMPBASEURI", base_uri)
     jsonstring = jsonstring.replace("TEMPITEMOF", itemof)
     jsonstring = jsonstring.replace("TEMPSIGEL", sigel)
-    os.system("psql whelk_dev -c 'update lddb set data = $${}$$ where id = $${}$$;'".format(jsonstring, systemid))
+    queueSql("update lddb set data = $${}$$ where id = $${}$$;".format(jsonstring, systemid))
 
 def setDeleted(systemid):
-    os.system("psql whelk_dev -c 'update lddb set deleted = true where id = $${}$$;'".format(systemid))
+    queueSql("update lddb set deleted = true where id = $${}$$;".format(systemid))
 
 def doExport(fromTime, toTime, profileName, exportDeleted=False, virtualDeletions=False):
+    flushSql()
     deleted="ignore"
     if exportDeleted:
         deleted="export"
@@ -245,7 +262,6 @@ newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "225
 setDeleted("hhhhhhhhhhhhhhhh")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK", exportDeleted=True, virtualDeletions=True)
 assertExported("tttttttttttttttt", "Test 18")
-
 
 ########## SUMMARY ##########
 
