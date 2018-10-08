@@ -15,7 +15,7 @@ set /p startTime=<lastRun.timestamp
 CALL :LOADUTCNOW
 set stopTime=%currentTime%
 
-# Hämta data
+rem Hämta data
 curl --fail -XPOST "https://libris.kb.se/api/marc_export/?from=%startTime%&until=%stopTime%&deleted=ignore&virtualDelete=false" --data-binary @.\etc\export.properties > export.txt
 if %errorlevel% neq 0 exit /b %errorlevel%
 
