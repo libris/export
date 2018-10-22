@@ -263,6 +263,14 @@ setDeleted("hhhhhhhhhhhhhhhh")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK", exportDeleted=True, virtualDeletions=True)
 assertExported("tttttttttttttttt", "Test 18")
 
+# Status = off, should not result in any data
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "status_off")
+assertNotExported("tttttttttttttttt", "Test 19")
+
+
 ########## SUMMARY ##########
 
 if not failedCases:
