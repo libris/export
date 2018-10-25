@@ -106,6 +106,8 @@ def assertNotExported(record001, failureMessage):
 
 with open('testdata/bib0.jsonld') as fh:
     bibtemplate = fh.read()
+with open('testdata/bibelectronic.jsonld') as fh:
+    bibelectronictemplate = fh.read()
 with open('testdata/hold0.jsonld') as fh:
     holdtemplate = fh.read()
 
@@ -269,6 +271,13 @@ newBib(bibtemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "status_off")
 assertNotExported("tttttttttttttttt", "Test 19")
+
+# New electronic should not export when efilter=on
+reset()
+newBib(bibelectronictemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "efilter_SEK")
+assertNotExported("tttttttttttttttt", "Test 20")
 
 
 ########## SUMMARY ##########
