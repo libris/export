@@ -37,7 +37,7 @@
         },
         {
             "@id": "TEMPBASEURITEMPID#it",
-            "@type": "Instance",
+            "@type": "Electronic",
 	    "carrierType": [
                 {
                     "@id": "https://id.kb.se/marc/OnlineResource"

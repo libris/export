@@ -229,8 +229,31 @@ newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "215
 relinkHolding(holdtemplate, "hhhhhhhhhhhhhhhh", "bbbbbbbbbbbbbbbb", "SEK")
 updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 12:00:00")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "bare_SEK")
-assertExported("tttttttttttttttt", "Test 14")
-assertExported("bbbbbbbbbbbbbbbb", "Test 14")
+assertExported("tttttttttttttttt", "Test 14-1")
+assertExported("bbbbbbbbbbbbbbbb", "Test 14-2")
+
+# Relinking holding multiple times inside update interval should export all bibs linked to inside the interval and the last before the interval
+reset()
+newBib(bibtemplate, "SEK", "tttttttttttttttt", "2150-01-01 12:00:00")
+newBib(bibtemplate, "SEK", "bbbbbbbbbbbbbbbb", "2150-01-01 12:00:00")
+newBib(bibtemplate, "SEK", "ffffffffffffffff", "2150-01-01 12:00:00")
+newBib(bibtemplate, "SEK", "gggggggggggggggg", "2150-01-01 12:00:00")
+newBib(bibtemplate, "SEK", "rrrrrrrrrrrrrrrr", "2150-01-01 12:00:00")
+newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2150-01-01 13:00:00")
+relinkHolding(holdtemplate, "hhhhhhhhhhhhhhhh", "bbbbbbbbbbbbbbbb", "SEK") # before the interval
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2151-01-01 12:00:00")
+relinkHolding(holdtemplate, "hhhhhhhhhhhhhhhh", "ffffffffffffffff", "SEK") # inside the interval
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 13:00:00")
+relinkHolding(holdtemplate, "hhhhhhhhhhhhhhhh", "gggggggggggggggg", "SEK") # inside the interval
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2250-01-01 14:00:00")
+relinkHolding(holdtemplate, "hhhhhhhhhhhhhhhh", "rrrrrrrrrrrrrrrr", "SEK") # after the interval
+updateRecord("SEK", "hhhhhhhhhhhhhhhh", "2350-01-01 12:00:00")
+doExport("2250-01-01T10:00:00Z", "2250-01-01T18:00:00Z", "bare_SEK")
+assertNotExported("tttttttttttttttt", "Test 14-3")
+assertExported("bbbbbbbbbbbbbbbb", "Test 14-4")
+assertExported("ffffffffffffffff", "Test 14-5")
+assertExported("gggggggggggggggg", "Test 14-6")
+assertNotExported("tttttttttttttttt", "Test 14-3")
 
 # Hold was deleted and holddelete=on, bib should be exported
 reset()
@@ -278,7 +301,6 @@ newBib(bibelectronictemplate, "SEK", "tttttttttttttttt", "2250-01-01 12:00:00")
 newHold(holdtemplate, "SEK", "hhhhhhhhhhhhhhhh", "tttttttttttttttt", "SEK", "2250-01-01 12:00:00")
 doExport("2250-01-01T10:00:00Z", "2250-01-01T15:00:00Z", "efilter_SEK")
 assertNotExported("tttttttttttttttt", "Test 20")
-
 
 ########## SUMMARY ##########
 
