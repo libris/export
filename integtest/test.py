@@ -253,7 +253,7 @@ assertNotExported("tttttttttttttttt", "Test 14-3")
 assertExported("bbbbbbbbbbbbbbbb", "Test 14-4")
 assertExported("ffffffffffffffff", "Test 14-5")
 assertExported("gggggggggggggggg", "Test 14-6")
-assertNotExported("tttttttttttttttt", "Test 14-3")
+assertNotExported("rrrrrrrrrrrrrrrr", "Test 14-7")
 
 # Hold was deleted and holddelete=on, bib should be exported
 reset()
