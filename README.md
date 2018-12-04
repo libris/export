@@ -1,11 +1,11 @@
 # Export
 
-Librisexport via OAI-PMH. Det här programmet erbjuder en metod för att hålla ett bibliotekssystem kontinuerligt uppdaterat med data ifrån Libris. Programmet fungerar så att det vid körning genererar en exportfil med alla uppdateringar som skett inom ett visst tidsintervall. Dom exportfiler som genereras är likadana som dom som hämtas från Libris via FTP. Fördelen med att använda det här programmet istället för att hämta filer via FTP, är att uppdateringar av poster kan nå ut mycket snabbare. Det här programmet kan köras när och hur ofta man vill för att få hem uppdateringar och man behöver alltså inte vänta på att filer ska genereras över natten. För att få kontinuerliga uppdateringar utan att behöva administrera tidsintervallet för hand, så finns det skript i katalogen examplescripts som sköter detta automatiskt.
+Det här programmet erbjuder en metod för att hålla ett bibliotekssystem kontinuerligt uppdaterat med data ifrån Libris. Programmet fungerar så att det vid körning genererar en exportfil med alla uppdateringar som skett inom ett visst tidsintervall. Dom exportfiler som genereras är likadana som dom som hämtas från Libris via FTP. Fördelen med att använda det här programmet istället för att hämta filer via FTP, är att uppdateringar av poster kan nå ut mycket snabbare. Det här programmet kan köras när och hur ofta man vill för att få hem uppdateringar och man behöver alltså inte vänta på att filer ska genereras över natten. För att få kontinuerliga uppdateringar utan att behöva administrera tidsintervallet för hand, så finns det skript i katalogen examplescripts som sköter detta automatiskt.
 
 ## Systemkrav
 
 * Progammet curl finns förinstallerat på Linux och OSX. Om du använder Windows kan du ladda ner det ifrån: https://curl.haxx.se/windows/ Se till att filerna ifrån bin katalogen ligger i samma katalog som du kör exportprogrammet ifrån.
-* En korrekt inställd klocka. Det är mycket viktigt att den dator som kör skripten/programmet har en korrekt inställd klocka. Det finns en säkerhetsmarginal på 10 sekunder, men om datorns klocka går mer än 10 sekunder före den korrekta tiden så finns en risk att man missar ändringar som görs i Libris. Använd en NTP-server för att se till att datorns klocka går rätt.
+* En korrekt inställd klocka. Det är mycket viktigt att den dator som kör skripten/programmet har en korrekt inställd klocka. Använd en NTP-server för att se till att datorns klocka går rätt.
 * För att använda exempelskripten på OSX krävs också programmet flock (kan installeras med Homebrew: `brew install flock`)
 
 
